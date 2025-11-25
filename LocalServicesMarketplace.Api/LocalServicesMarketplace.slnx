@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="../LocalServicesMarketplace.Core/LocalServicesMarketplace.Core.csproj" />
+    <Project Path="../LocalServicesMarketplace.Infrastructure/LocalServicesMarketplace.Infrastructure.csproj" />
+    <Project Path="LocalServicesMarketplace.Api.csproj" />
+  </Folder>
+</Solution>
