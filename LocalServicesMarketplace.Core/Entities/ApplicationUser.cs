@@ -24,6 +24,11 @@ public class ApplicationUser : IdentityUser
     public string? City { get; set; }
     public string? PostalCode { get; set; }
 
+    // Geolocation
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public int ServiceRadiusKm { get; set; } = 25;
+
     // Security
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }

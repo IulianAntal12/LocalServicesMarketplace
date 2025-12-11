@@ -12,6 +12,9 @@ public class UpdateProviderProfileCommand : IRequest<Result<UpdateProviderProfil
     public string? Address { get; set; }
     public string? City { get; set; }
     public string? PostalCode { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public int? ServiceRadiusKm { get; set; }
 }
 
 public class UpdateProviderProfileResponse

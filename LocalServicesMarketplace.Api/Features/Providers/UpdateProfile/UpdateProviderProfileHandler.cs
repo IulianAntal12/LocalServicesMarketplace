@@ -49,6 +49,15 @@ public class UpdateProviderProfileHandler(ApplicationDbContext context, ICurrent
         if (request.PostalCode != null)
             provider.PostalCode = request.PostalCode;
 
+        if (request.Latitude.HasValue)
+            provider.Latitude = request.Latitude.Value;
+
+        if (request.Longitude.HasValue)
+            provider.Longitude = request.Longitude.Value;
+
+        if (request.ServiceRadiusKm.HasValue)
+            provider.ServiceRadiusKm = request.ServiceRadiusKm.Value;
+
         await context.SaveChangesAsync(ct);
 
         return Result<UpdateProviderProfileResponse>.Success(

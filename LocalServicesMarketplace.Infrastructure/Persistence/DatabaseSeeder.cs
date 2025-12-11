@@ -68,6 +68,9 @@ public static class DatabaseSeeder
                 Address = "123 Main St",
                 City = "Springfield",
                 PostalCode = "12345",
+                Latitude = 39.7817,
+                Longitude = -89.6501,
+                ServiceRadiusKm = 30,
                 EmailConfirmed = true,
                 IsActive = true
             };
@@ -93,6 +96,9 @@ public static class DatabaseSeeder
                 Address = "789 Electric Blvd",
                 City = "Springfield",
                 PostalCode = "12347",
+                Latitude = 39.7900,
+                Longitude = -89.6440,
+                ServiceRadiusKm = 25,
                 EmailConfirmed = true,
                 IsActive = true
             };

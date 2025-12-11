@@ -47,6 +47,9 @@ public class GetProviderProfileHandler(ApplicationDbContext context, ICurrentUse
             Address = provider.Address,
             City = provider.City,
             PostalCode = provider.PostalCode,
+            Latitude = provider.Latitude,
+            Longitude = provider.Longitude,
+            ServiceRadiusKm = provider.ServiceRadiusKm,
             Services = [.. provider.Services.Select(s => new ServiceDto
             {
                 Id = s.Id,

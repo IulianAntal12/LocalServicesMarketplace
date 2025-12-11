@@ -24,6 +24,10 @@ public class ProviderProfileResponse
     public string? Address { get; set; }
     public string? City { get; set; }
     public string? PostalCode { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public int ServiceRadiusKm { get; set; }
+
     public List<ServiceDto> Services { get; set; } = [];
     public List<PortfolioImageDto> PortfolioImages { get; set; } = [];
 }
