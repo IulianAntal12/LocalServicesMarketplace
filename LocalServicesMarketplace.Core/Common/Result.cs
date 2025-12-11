@@ -42,6 +42,9 @@ public class Result<TEntity>
         IsSuccess = false
     };
 
+    public static Result<TEntity> Failure(string error = "Failure")
+        => Failure(HttpStatusCode.BadRequest, error);
+
     public static Result<TEntity> NotFound(string error = "Resource not found")
         => Failure(HttpStatusCode.NotFound, error);
 

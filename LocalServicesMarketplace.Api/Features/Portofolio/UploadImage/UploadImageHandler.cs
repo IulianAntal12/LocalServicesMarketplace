@@ -1,5 +1,4 @@
-﻿using LocalServicesMarketplace.Api.Features.Portfolio.UploadImage;
-using LocalServicesMarketplace.Api.Services.Interfaces;
+﻿using LocalServicesMarketplace.Api.Services.Interfaces;
 using LocalServicesMarketplace.Core.Common;
 using LocalServicesMarketplace.Core.Entities;
 using LocalServicesMarketplace.Infrastructure.Persistence;

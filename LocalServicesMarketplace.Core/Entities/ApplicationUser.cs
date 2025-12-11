@@ -32,4 +32,7 @@ public class ApplicationUser : IdentityUser
 
     public List<Service> Services { get; set; } = [];
     public List<PortfolioImage> PortfolioImages { get; set; } = [];
+
+    public List<Review> ReviewsReceived { get; set; } = [];
+    public List<Review> ReviewsGiven { get; set; } = [];
 }

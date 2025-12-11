@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Service> Services { get; set; }
     public DbSet<ServiceCategory> ServiceCategories { get; set; }
     public DbSet<PortfolioImage> PortfolioImages { get; set; }
+    public DbSet<Review> Reviews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -112,6 +113,36 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany(u => u.PortfolioImages)
                 .HasForeignKey(p => p.ProviderId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure Review
+        builder.Entity<Review>(entity =>
+        {
+            entity.HasIndex(r => r.ProviderId);
+            entity.HasIndex(r => r.CustomerId);
+            entity.HasIndex(r => r.ServiceId);
+            entity.HasIndex(r => r.CreatedAt);
+            entity.HasIndex(r => new { r.ProviderId, r.IsVisible });
+
+            entity.Property(r => r.Title).HasMaxLength(100).IsRequired();
+            entity.Property(r => r.Comment).HasMaxLength(1000).IsRequired();
+            entity.Property(r => r.ProviderResponse).HasMaxLength(500);
+            entity.Property(r => r.Rating).IsRequired();
+
+            entity.HasOne(r => r.Customer)
+                .WithMany(u => u.ReviewsGiven)
+                .HasForeignKey(r => r.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.Provider)
+                .WithMany(u => u.ReviewsReceived)
+                .HasForeignKey(r => r.ProviderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.Service)
+                .WithMany()
+                .HasForeignKey(r => r.ServiceId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

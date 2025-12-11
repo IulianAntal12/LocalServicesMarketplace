@@ -1,7 +1,7 @@
 ﻿using LocalServicesMarketplace.Core.Common;
 using MediatR;
 
-namespace LocalServicesMarketplace.Api.Features.Portfolio.UploadImage;
+namespace LocalServicesMarketplace.Api.Features.Portofolio.UploadImage;
 
 public class UploadImageCommand : IRequest<Result<UploadImageResponse>>
 {
