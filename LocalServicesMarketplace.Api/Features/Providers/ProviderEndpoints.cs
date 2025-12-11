@@ -37,7 +37,7 @@ public class ProviderEndpoints : IEndpoint
 
         group.MapGet("/search", SearchProvidersAsync)
             .AllowAnonymous()
-            .WithName("SearchProviders")
+            .WithName("SearchProvidersByFilter")
             .WithSummary("Search providers by category or location")
             .Produces<List<ProviderListDto>>();
 
