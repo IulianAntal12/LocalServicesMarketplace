@@ -201,3 +201,7 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+export * from "./provider";
+export type { Category } from "../services/categoryService";
+export type { PortfolioImage as PortfolioServiceImage } from "../services/portfolioService";
