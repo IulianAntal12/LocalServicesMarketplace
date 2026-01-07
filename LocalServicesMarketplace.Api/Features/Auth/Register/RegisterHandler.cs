@@ -67,6 +67,15 @@ public class RegisterHandler(
         FirstName = request.FirstName,
         LastName = request.LastName,
         CreatedAt = DateTime.UtcNow,
+
+        // Location
+        County = request.County,
+        City = request.City,
+        Latitude = request.Latitude,
+        Longitude = request.Longitude,
+
+        // Provider fields
+        PhoneNumber = request.PhoneNumber,
         BusinessName = request.BusinessName,
         BusinessDescription = request.BusinessDescription
     };

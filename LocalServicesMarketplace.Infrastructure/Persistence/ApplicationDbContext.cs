@@ -43,6 +43,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                     c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                     c => c.ToList()
                 ));
+            entity.Property(u => u.County).HasMaxLength(50);
             entity.Property(u => u.Latitude).HasPrecision(9, 6);
             entity.Property(u => u.Longitude).HasPrecision(9, 6);
             entity.Property(u => u.ServiceRadiusKm).HasDefaultValue(25);

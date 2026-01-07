@@ -25,6 +25,7 @@ public class ApplicationUser : IdentityUser
     public string? PostalCode { get; set; }
 
     // Geolocation
+    public string? County { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public int ServiceRadiusKm { get; set; } = 25;

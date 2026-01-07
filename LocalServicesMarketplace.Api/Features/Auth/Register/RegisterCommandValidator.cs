@@ -31,8 +31,26 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .NotEmpty().WithMessage("Role is required!")
             .Must(BeValidRole).WithMessage($"Role must be {Roles.Customer} or {Roles.Provider}");
 
+        // Location - Required for all users
+        RuleFor(x => x.County)
+            .NotEmpty().WithMessage("County is required!");
+
+        RuleFor(x => x.City)
+            .NotEmpty().WithMessage("City is required!");
+
+        RuleFor(x => x.Latitude)
+            .InclusiveBetween(43.5, 48.5).WithMessage("Invalid latitude for Romania.");
+
+        RuleFor(x => x.Longitude)
+            .InclusiveBetween(20.0, 30.5).WithMessage("Invalid longitude for Romania.");
+
+
         When(x => x.Role == Roles.Provider, () =>
         {
+            RuleFor(x => x.PhoneNumber)
+               .NotEmpty().WithMessage("Phone number is required for providers!")
+               .Matches(@"^(\+40|0)[0-9]{9}$").WithMessage("Invalid Romanian phone number format. Use +40XXXXXXXXX or 0XXXXXXXXX");
+
             RuleFor(x => x.BusinessName)
                 .NotEmpty().WithMessage("Business name is required for providers!")
                 .MaximumLength(100).WithMessage("Business name cannot exceed 100 characters.");
