@@ -9,6 +9,7 @@ using LocalServicesMarketplace.Core.Constants;
 using LocalServicesMarketplace.Core.Entities;
 using LocalServicesMarketplace.Infrastructure.Persistence;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,20 +44,20 @@ public class ProviderEndpoints : IEndpoint
 
         // Provider-only endpoints
         group.MapGet("/profile/me", GetMyProfileAsync)
-            .RequireAuthorization(Roles.Provider)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("GetMyProfile")
             .WithSummary("Get current provider's profile")
             .Produces<ProviderProfileResponse>();
 
         group.MapPut("/profile", UpdateProfileAsync)
-            .RequireAuthorization(Roles.Provider)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("UpdateProviderProfile")
             .WithSummary("Update provider profile")
             .Produces<UpdateProviderProfileResponse>();
 
         // Services management
         group.MapPost("/services", CreateServiceAsync)
-            .RequireAuthorization(Roles.Provider)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("CreateService")
             .WithSummary("Create a new service")
             .Produces<CreateServiceResponse>(StatusCodes.Status201Created);
@@ -68,13 +69,13 @@ public class ProviderEndpoints : IEndpoint
             .Produces<List<ServiceDto>>();
 
         group.MapPut("/services/{serviceId}", UpdateServiceAsync)
-            .RequireAuthorization(Roles.Provider)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("UpdateService")
             .WithSummary("Update service details")
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapDelete("/services/{serviceId}", DeleteServiceAsync)
-            .RequireAuthorization(Roles.Provider)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("DeleteService")
             .WithSummary("Delete a service")
             .Produces(StatusCodes.Status204NoContent);

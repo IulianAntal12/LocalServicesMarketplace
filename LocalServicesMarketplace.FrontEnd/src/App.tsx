@@ -6,6 +6,7 @@ import { Layout } from "./components/layout";
 import { HomePage } from "./features/home";
 import { LoginPage, RegisterPage } from "./features/auth";
 import "./styles/globals.css";
+import { ProviderDashboard } from "./features/dashboard";
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -105,7 +106,7 @@ function App() {
               path="/dashboard/provider"
               element={
                 <Layout>
-                  <PlaceholderPage title="Provider Dashboard" />
+                  <ProviderDashboard />
                 </Layout>
               }
             />

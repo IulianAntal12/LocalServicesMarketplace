@@ -11,6 +11,7 @@ using LocalServicesMarketplace.Core.Constants;
 using LocalServicesMarketplace.Core.Entities;
 using LocalServicesMarketplace.Infrastructure.Persistence;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,35 +33,35 @@ public class ReviewEndpoints : IEndpoint
 
         // Customer endpoints
         group.MapPost("/", CreateReviewAsync)
-            .RequireAuthorization(Roles.Customer)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Customer})
             .WithName("CreateReview")
             .WithSummary("Create a review for a provider")
             .Produces<CreateReviewResponse>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
         group.MapPut("/{reviewId:int}", UpdateReviewAsync)
-            .RequireAuthorization(Roles.Customer)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Customer })
             .WithName("UpdateReview")
             .WithSummary("Update your review")
             .Produces<UpdateReviewResponse>()
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/my", GetMyReviewsAsync)
-            .RequireAuthorization(Roles.Customer)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Customer })
             .WithName("GetMyReviews")
             .WithSummary("Get reviews written by current customer")
             .Produces<List<ReviewDto>>();
 
         // Provider endpoints
         group.MapPost("/{reviewId:int}/respond", RespondToReviewAsync)
-            .RequireAuthorization(Roles.Provider)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("RespondToReview")
             .WithSummary("Provider responds to a review")
             .Produces<RespondToReviewResponse>()
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/received", GetReceivedReviewsAsync)
-            .RequireAuthorization(Roles.Provider)
+            .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("GetReceivedReviews")
             .WithSummary("Get reviews received by current provider")
             .Produces<GetProviderReviewsResponse>();
