@@ -1,0 +1,94 @@
+.selectWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text);
+}
+
+.selectContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select {
+  width: 100%;
+  padding: var(--space-3) var(--space-10) var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+
+.select.hasLeftIcon {
+  padding-left: var(--space-10);
+}
+
+.selectContainer.error .select {
+  border-color: var(--color-error);
+}
+
+.selectContainer.error .select:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.selectContainer.disabled .select {
+  background-color: var(--color-border-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.leftIcon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.arrow {
+  position: absolute;
+  right: var(--space-3);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.errorText {
+  font-size: var(--text-sm);
+  color: var(--color-error);
+}
+
+.helperText {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Style the select options */
+.select option {
+  padding: var(--space-2);
+}
+
+.select option:disabled {
+  color: var(--color-text-muted);
+}

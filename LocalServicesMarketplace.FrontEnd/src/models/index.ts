@@ -25,6 +25,13 @@ export interface RegisterRequest {
   firstName: string;
   lastName: string;
   role: "Customer" | "Provider";
+  // Location - Required for all users
+  county: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  // Provider-only fields
+  phoneNumber?: string;
   businessName?: string;
   businessDescription?: string;
 }
@@ -54,6 +61,7 @@ export interface Provider {
   rating?: number;
   totalReviews: number;
   city?: string;
+  county?: string;
   serviceAreas: string[];
   serviceCount: number;
   portfolioImageCount: number;
@@ -63,6 +71,7 @@ export interface ProviderProfile {
   id: string;
   email: string;
   fullName: string;
+  phoneNumber?: string;
   businessName?: string;
   businessDescription?: string;
   hourlyRate?: number;
@@ -72,7 +81,10 @@ export interface ProviderProfile {
   profilePictureUrl?: string;
   address?: string;
   city?: string;
+  county?: string;
   postalCode?: string;
+  latitude?: number;
+  longitude?: number;
   services: Service[];
   portfolioImages: PortfolioImage[];
 }
@@ -84,7 +96,10 @@ export interface UpdateProviderProfileRequest {
   serviceAreas?: string[];
   address?: string;
   city?: string;
+  county?: string;
   postalCode?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 // ============= Service Models =============
