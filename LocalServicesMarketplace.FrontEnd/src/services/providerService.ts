@@ -2,6 +2,11 @@ import api from "./api";
 
 // TYPES
 export interface ProviderListItem {
+  name: any;
+  category: ReactNode;
+  reviews: ReactNode;
+  location: ReactNode;
+  price: ReactNode;
   id: string;
   businessName: string;
   businessDescription: string | null;
@@ -33,6 +38,7 @@ export interface PortfolioImageDto {
 }
 
 export interface ProviderProfile {
+  phoneNumber: string | null;
   id: string;
   email: string;
   fullName: string;
@@ -53,6 +59,7 @@ export interface ProviderProfile {
 export interface UpdateProfileRequest {
   businessName?: string;
   businessDescription?: string;
+  phoneNumber?: string;
   hourlyRate?: number;
   serviceAreas?: string[];
   address?: string;
@@ -88,7 +95,6 @@ export interface SearchProvidersParams {
 
 // SERVICE
 export const providerService = {
-  
   // PUBLIC ENDPOINTS
   // Get all providers
   getAll: async (): Promise<ProviderListItem[]> => {

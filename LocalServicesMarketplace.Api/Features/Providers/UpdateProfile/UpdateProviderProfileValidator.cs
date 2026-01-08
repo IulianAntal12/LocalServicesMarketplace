@@ -45,5 +45,9 @@ public class UpdateProviderProfileValidator : AbstractValidator<UpdateProviderPr
             .InclusiveBetween(1, 100)
             .When(x => x.ServiceRadiusKm.HasValue)
             .WithMessage("Service radius must be between 1 and 100 km!");
+
+        RuleFor(x => x.PhoneNumber)
+            .NotEmpty().WithMessage("Phone number is required for providers!")
+            .Matches(@"^(\+40|0)[0-9]{9}$").WithMessage("Invalid Romanian phone number format. Use +40XXXXXXXXX or 0XXXXXXXXX");
     }
 }

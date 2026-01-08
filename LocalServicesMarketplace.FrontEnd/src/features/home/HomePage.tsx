@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -13,9 +13,14 @@ import {
   TreePine,
   Wind,
   Building,
+  Loader2,
 } from "lucide-react";
 import { Button } from "../../components/common";
 import styles from "./HomePage.module.css";
+import {
+  providerService,
+  type ProviderListItem,
+} from "../../services/providerService";
 
 // Category data
 const categories = [
@@ -29,41 +34,44 @@ const categories = [
   { id: 8, name: "Carpentry", icon: Building, count: 34, color: "#D97706" },
 ];
 
-// Mock featured providers - replace with API call
-const featuredProviders = [
-  {
-    id: "1",
-    name: "John's Plumbing",
-    category: "Plumbing",
-    rating: 4.8,
-    reviews: 127,
-    price: "$75/hr",
-    location: "Downtown",
-  },
-  {
-    id: "2",
-    name: "Lightning Electric",
-    category: "Electrical",
-    rating: 4.9,
-    reviews: 89,
-    price: "$85/hr",
-    location: "Northside",
-  },
-  {
-    id: "3",
-    name: "HandyPro Services",
-    category: "Handyman",
-    rating: 4.7,
-    reviews: 203,
-    price: "$60/hr",
-    location: "Westend",
-  },
-];
-
 export function HomePage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
+
+  const [featuredProviders, setFeaturedProviders] = useState<
+    ProviderListItem[]
+  >([]);
+  const [loadingProviders, setLoadingProviders] = useState(true);
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        setLoadingProviders(true);
+        const providers = await providerService.getAll();
+        // Get top 4 providers sorted by rating
+        const sorted = providers
+          .filter((p) => p.businessName)
+          .sort((a, b) => {
+            // Sort by rating (nulls last), then by review count
+            if (a.rating === null && b.rating === null)
+              return b.totalReviews - a.totalReviews;
+            if (a.rating === null) return 1;
+            if (b.rating === null) return -1;
+            if (b.rating !== a.rating) return b.rating - a.rating;
+            return b.totalReviews - a.totalReviews;
+          })
+          .slice(0, 4);
+        setFeaturedProviders(sorted);
+      } catch (err) {
+        console.error("Error fetching providers:", err);
+      } finally {
+        setLoadingProviders(false);
+      }
+    };
+
+    fetchProviders();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,24 +186,20 @@ export function HomePage() {
       </section>
 
       {/* Featured Providers Section */}
-      <section className={`${styles.section} ${styles.sectionAlt}`}>
-        <div className={styles.container}>
-          <div className={styles.sectionHeaderRow}>
-            <div>
-              <h2 className={styles.sectionTitle}>Top Rated Providers</h2>
-              <p className={styles.sectionSubtitle}>
-                Trusted professionals with excellent reviews
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/search?sortBy=rating")}
-              rightIcon={<ChevronRight size={16} />}
-            >
-              View All
-            </Button>
-          </div>
+      <section className={styles.providersSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Top Rated Providers</h2>
+          <p className={styles.sectionSubtitle}>
+            Trusted professionals in your area
+          </p>
+        </div>
 
+        {loadingProviders ? (
+          <div className={styles.loadingProviders}>
+            <Loader2 className={styles.spinner} size={32} />
+            <p>Loading providers...</p>
+          </div>
+        ) : featuredProviders.length > 0 ? (
           <div className={styles.providersGrid}>
             {featuredProviders.map((provider) => (
               <div
@@ -203,44 +207,56 @@ export function HomePage() {
                 className={styles.providerCard}
                 onClick={() => navigate(`/providers/${provider.id}`)}
               >
-                <div className={styles.providerHeader}>
-                  <div className={styles.providerAvatar}>
-                    {provider.name.charAt(0)}
-                  </div>
-                  <div className={styles.providerInfo}>
-                    <h3 className={styles.providerName}>{provider.name}</h3>
-                    <span className={styles.providerCategory}>
-                      {provider.category}
-                    </span>
-                  </div>
+                <div className={styles.providerAvatar}>
+                  <span className={styles.providerInitial}>
+                    {provider.businessName.charAt(0).toUpperCase()}
+                  </span>
                 </div>
-
-                <div className={styles.providerMeta}>
-                  <div className={styles.providerRating}>
-                    <Star size={16} fill="#F59E0B" color="#F59E0B" />
-                    <span className={styles.ratingValue}>
-                      {provider.rating}
-                    </span>
-                    <span className={styles.ratingCount}>
-                      ({provider.reviews})
+                <div className={styles.providerInfo}>
+                  <h3 className={styles.providerName}>
+                    {provider.businessName}
+                  </h3>
+                  {provider.city && (
+                    <p className={styles.providerLocation}>
+                      <MapPin size={14} />
+                      {provider.city}
+                    </p>
+                  )}
+                  <div className={styles.providerMeta}>
+                    {provider.rating !== null ? (
+                      <span className={styles.providerRating}>
+                        <Star size={14} fill="currentColor" />
+                        {provider.rating.toFixed(1)}
+                      </span>
+                    ) : (
+                      <span className={styles.providerRating}>New</span>
+                    )}
+                    <span className={styles.providerReviews}>
+                      {provider.totalReviews}{" "}
+                      {provider.totalReviews === 1 ? "review" : "reviews"}
                     </span>
                   </div>
-                  <span className={styles.metaDivider}>•</span>
-                  <div className={styles.providerLocation}>
-                    <MapPin size={14} />
-                    <span>{provider.location}</span>
-                  </div>
-                </div>
-
-                <div className={styles.providerFooter}>
-                  <span className={styles.providerPrice}>{provider.price}</span>
-                  <Button variant="primary" size="sm">
-                    View Profile
-                  </Button>
+                  <p className={styles.providerServices}>
+                    {provider.serviceCount}{" "}
+                    {provider.serviceCount === 1 ? "service" : "services"}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
+        ) : (
+          <div className={styles.noProviders}>
+            <p>No providers available yet. Be the first to join!</p>
+            <Button onClick={() => navigate("/register")}>
+              Become a Provider
+            </Button>
+          </div>
+        )}
+
+        <div className={styles.sectionCta}>
+          <Button variant="outline" onClick={() => navigate("/search")}>
+            View All Providers
+          </Button>
         </div>
       </section>
 

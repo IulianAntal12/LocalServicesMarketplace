@@ -39,6 +39,7 @@ public class GetProviderProfileHandler(ApplicationDbContext context, ICurrentUse
             FullName = provider.FullName,
             BusinessName = provider.BusinessName,
             BusinessDescription = provider.BusinessDescription,
+            PhoneNumber = provider.PhoneNumber,
             HourlyRate = provider.HourlyRate,
             ServiceAreas = provider.ServiceAreas,
             Rating = provider.Rating,

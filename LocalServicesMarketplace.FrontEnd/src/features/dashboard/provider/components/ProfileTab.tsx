@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Save, Plus, X, Loader2 } from "lucide-react";
 import {
   type ProviderProfile,
-  type UpdateProfileRequest,
   providerService,
 } from "../../../../services/providerService";
 import { Button } from "../../../../components/common/Button";
@@ -19,9 +18,10 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
   const [loading, setLoading] = useState(false);
   const [newServiceArea, setNewServiceArea] = useState("");
 
-  const [formData, setFormData] = useState<UpdateProfileRequest>({
+  const [formData, setFormData] = useState({
     businessName: profile.businessName || "",
     businessDescription: profile.businessDescription || "",
+    phoneNumber: profile.phoneNumber || "",
     hourlyRate: profile.hourlyRate || undefined,
     serviceAreas: profile.serviceAreas || [],
     address: profile.address || "",
@@ -122,6 +122,21 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
             <span className={styles.charCount}>
               {formData.businessDescription?.length || 0}/500
             </span>
+          </div>
+
+          {/* Phone Number */}
+          <div className={styles.formGroup}>
+            <label htmlFor="phoneNumber" className={styles.label}>
+              Phone Number
+            </label>
+            <Input
+              id="phoneNumber"
+              name="phoneNumber"
+              type="tel"
+              value={formData.phoneNumber || ""}
+              onChange={handleChange}
+              placeholder="e.g., 0740 123 456"
+            />
           </div>
 
           {/* Hourly Rate */}
@@ -269,6 +284,12 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
             <span className={styles.infoLabel}>Full Name</span>
             <span className={styles.infoValue}>{profile.fullName}</span>
           </div>
+          {profile.phoneNumber && (
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Phone</span>
+              <span className={styles.infoValue}>{profile.phoneNumber}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ public class UpdateProviderProfileCommand : IRequest<Result<UpdateProviderProfil
     public string? BusinessDescription { get; set; }
     public decimal? HourlyRate { get; set; }
     public List<string>? ServiceAreas { get; set; }
+    public string? PhoneNumber { get; set; }
     public string? Address { get; set; }
     public string? City { get; set; }
     public string? PostalCode { get; set; }

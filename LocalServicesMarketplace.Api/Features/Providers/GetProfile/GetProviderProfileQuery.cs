@@ -17,6 +17,7 @@ public class ProviderProfileResponse
     public string? BusinessName { get; set; }
     public string? BusinessDescription { get; set; }
     public decimal? HourlyRate { get; set; }
+    public string? PhoneNumber { get; set; }
     public List<string> ServiceAreas { get; set; } = [];
     public double? Rating { get; set; }
     public int TotalReviews { get; set; }

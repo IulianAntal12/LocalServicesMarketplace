@@ -5,6 +5,7 @@ using LocalServicesMarketplace.Core.Constants;
 using LocalServicesMarketplace.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace LocalServicesMarketplace.Api.Features.Providers.UpdateProfile;
 
@@ -39,6 +40,9 @@ public class UpdateProviderProfileHandler(ApplicationDbContext context, ICurrent
 
         if (request.ServiceAreas != null)
             provider.ServiceAreas = request.ServiceAreas;
+
+        if (request.PhoneNumber != null)
+            provider.PhoneNumber = request.PhoneNumber;
 
         if (request.Address != null)
             provider.Address = request.Address;
