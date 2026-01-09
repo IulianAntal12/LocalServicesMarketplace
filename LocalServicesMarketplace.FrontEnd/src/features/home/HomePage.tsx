@@ -16,7 +16,7 @@ import {
   Loader2,
   Grid3X3,
 } from "lucide-react";
-import { Button } from "../../components/common";
+import { Button, SearchableSelect } from "../../components/common";
 import { categoryService, type Category } from "../../services/categoryService";
 import {
   providerService,
@@ -60,8 +60,6 @@ export function HomePage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const [citySearch, setCitySearch] = useState("");
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
 
   // Data states
   const [categories, setCategories] = useState<Category[]>([]);
@@ -79,13 +77,6 @@ export function HomePage() {
       fullName: `${city.name}, ${county.name}`,
     }))
   );
-
-  // Filter cities based on search
-  const filteredCities = allCities
-    .filter((city) =>
-      city.fullName.toLowerCase().includes(citySearch.toLowerCase())
-    )
-    .slice(0, 10);
 
   // Fetch categories
   useEffect(() => {
@@ -145,16 +136,6 @@ export function HomePage() {
     navigate(`/search?category=${encodeURIComponent(categoryName)}`);
   };
 
-  const handleCitySelect = (city: {
-    name: string;
-    county: string;
-    fullName: string;
-  }) => {
-    setSelectedCity(city.name);
-    setCitySearch(city.fullName);
-    setShowCityDropdown(false);
-  };
-
   const getCategoryIcon = (categoryName: string) => {
     return categoryIcons[categoryName] || defaultIcon;
   };
@@ -198,39 +179,19 @@ export function HomePage() {
             </div>
             <div className={styles.searchDivider} />
             <div className={styles.searchField}>
-              <MapPin size={20} className={styles.searchIcon} />
               <div className={styles.locationInputWrapper}>
-                <input
-                  type="text"
-                  placeholder="Select your city"
-                  value={citySearch}
-                  onChange={(e) => {
-                    setCitySearch(e.target.value);
-                    setSelectedCity("");
-                    setShowCityDropdown(true);
-                  }}
-                  onFocus={() => setShowCityDropdown(true)}
-                  onBlur={() =>
-                    setTimeout(() => setShowCityDropdown(false), 200)
-                  }
-                  className={styles.searchInput}
+                <MapPin size={20} className={styles.inputIcon} />
+                <SearchableSelect
+                  options={allCities.map((city) => ({
+                    value: city.name,
+                    label: city.fullName,
+                    group: city.county,
+                  }))}
+                  value={selectedCity}
+                  onChange={(value) => setSelectedCity(value)}
+                  placeholder="City or area"
+                  groupBy
                 />
-                {showCityDropdown &&
-                  citySearch &&
-                  filteredCities.length > 0 && (
-                    <div className={styles.cityDropdown}>
-                      {filteredCities.map((city) => (
-                        <div
-                          key={city.fullName}
-                          className={styles.cityOption}
-                          onMouseDown={() => handleCitySelect(city)}
-                        >
-                          <MapPin size={14} />
-                          <span>{city.fullName}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
               </div>
             </div>
             <Button

@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { X } from "lucide-react";
 import styles from "./Modal.module.css";
 
@@ -8,6 +8,7 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   size?: "small" | "medium" | "large";
+  closeOnOverlayClick?: boolean;
 }
 
 export function Modal({
@@ -16,38 +17,37 @@ export function Modal({
   title,
   children,
   size = "medium",
+  closeOnOverlayClick = false,
 }: ModalProps) {
-  const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+  // Handle ESC key - only if closeOnOverlayClick is true
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && closeOnOverlayClick) {
         onClose();
       }
-    },
-    [onClose]
-  );
+    };
 
-  useEffect(() => {
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
+      document.addEventListener("keydown", handleEsc);
       document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleEsc);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, handleEscape]);
+  }, [isOpen, onClose, closeOnOverlayClick]);
 
   if (!isOpen) return null;
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (closeOnOverlayClick && e.target === e.currentTarget) {
       onClose();
     }
   };
 
   return (
-    <div className={styles.backdrop} onClick={handleBackdropClick}>
+    <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={`${styles.modal} ${styles[size]}`}>
         <div className={styles.header}>
           <h2 className={styles.title}>{title}</h2>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Star, MessageSquareMore, Loader2, PenLine } from "lucide-react";
 import {
   reviewService,
@@ -18,6 +18,7 @@ interface ProviderReviewsProps {
   providerId: string;
   providerName: string;
   services: ServiceDto[];
+  onReviewChange?: () => void;
 }
 
 const SORT_OPTIONS = [
@@ -30,6 +31,7 @@ export function ProviderReviews({
   providerId,
   providerName,
   services,
+  onReviewChange,
 }: ProviderReviewsProps) {
   const { isAuthenticated, user } = useAuth();
   const isCustomer = user?.roles?.includes("Customer");
@@ -47,27 +49,27 @@ export function ProviderReviews({
     (r) => r.customerId === user?.id
   );
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        setLoading(true);
-        const data = await reviewService.getProviderReviews(
-          providerId,
-          page,
-          10,
-          sortBy
-        );
-        setReviewsData(data);
-      } catch (err) {
-        console.error("Error fetching reviews:", err);
-        toast.error("Failed to load reviews");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReviews();
+  const fetchReviews = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await reviewService.getProviderReviews(
+        providerId,
+        page,
+        10,
+        sortBy
+      );
+      setReviewsData(data);
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
+      toast.error("Failed to load reviews");
+    } finally {
+      setLoading(false);
+    }
   }, [providerId, page, sortBy]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
 
   const handleWriteReview = () => {
     setEditingReview(null);
@@ -87,8 +89,8 @@ export function ProviderReviews({
     try {
       await reviewService.deleteReview(reviewId);
       toast.success("Review deleted successfully");
-      // Trigger refetch by updating a state
-      setPage(1); // This will trigger useEffect
+      fetchReviews();
+      onReviewChange?.();
     } catch (err) {
       toast.error("Failed to delete review");
       console.error("Error deleting review:", err);
@@ -96,7 +98,8 @@ export function ProviderReviews({
   };
 
   const handleFormSuccess = () => {
-    setPage(1); // This will trigger useEffect to refetch
+    fetchReviews();
+    onReviewChange?.();
   };
 
   const getRatingPercentage = (rating: number): number => {

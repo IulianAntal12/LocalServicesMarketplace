@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, ArrowLeft } from "lucide-react";
 import {
@@ -22,29 +22,34 @@ export function ProviderProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("services");
 
-  useEffect(() => {
-    const fetchProvider = async () => {
-      if (!providerId) {
-        setError("Provider ID is required");
-        setLoading(false);
-        return;
-      }
+  const fetchProvider = useCallback(async () => {
+    if (!providerId) {
+      setError("Provider ID is required");
+      setLoading(false);
+      return;
+    }
 
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await providerService.getById(providerId);
-        setProvider(data);
-      } catch (err) {
-        setError("Provider not found or an error occurred.");
-        console.error("Error fetching provider:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProvider();
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await providerService.getById(providerId);
+      setProvider(data);
+    } catch (err) {
+      setError("Provider not found or an error occurred.");
+      console.error("Error fetching provider:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [providerId]);
+
+  useEffect(() => {
+    fetchProvider();
+  }, [fetchProvider]);
+
+  const handleReviewChange = () => {
+    // Refetch provider data to update rating/totalReviews in header
+    fetchProvider();
+  };
 
   if (loading) {
     return (
@@ -126,6 +131,7 @@ export function ProviderProfilePage() {
             providerId={provider.id}
             providerName={provider.businessName || provider.fullName}
             services={provider.services}
+            onReviewChange={handleReviewChange}
           />
         )}
         {activeTab === "about" && (

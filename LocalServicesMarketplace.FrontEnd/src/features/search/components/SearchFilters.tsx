@@ -1,7 +1,7 @@
 import { Star } from "lucide-react";
 import type { Category } from "../../../services/categoryService";
 import type { FilterState } from "../SearchPage";
-import { Button } from "../../../components/common";
+import { Button, SearchableSelect } from "../../../components/common";
 import styles from "./SearchFilters.module.css";
 
 interface SearchFiltersProps {
@@ -34,58 +34,59 @@ export function SearchFilters({
   onClearFilters,
   hasActiveFilters,
 }: SearchFiltersProps) {
+  // Build category options
+  const categoryOptions = categories.map((cat) => ({
+    value: cat.name,
+    label: cat.name,
+  }));
+
+  // Build city options
+  const cityOptions = cities.map((city) => ({
+    value: city,
+    label: city,
+  }));
+
+  // Build sort options
+  const sortSelectOptions = sortOptions.map((opt) => ({
+    value: opt.value,
+    label: opt.label,
+  }));
+
   return (
     <div className={styles.filters}>
       {/* Sort By */}
       <div className={styles.filterGroup}>
         <label className={styles.filterLabel}>Sort By</label>
-        <select
+        <SearchableSelect
+          options={sortSelectOptions}
           value={filters.sortBy}
-          onChange={(e) =>
-            onFilterChange({ sortBy: e.target.value as FilterState["sortBy"] })
+          onChange={(value) =>
+            onFilterChange({ sortBy: value as FilterState["sortBy"] })
           }
-          className={styles.select}
-        >
-          {sortOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          placeholder="Select sort order..."
+        />
       </div>
 
       {/* Category Filter */}
       <div className={styles.filterGroup}>
         <label className={styles.filterLabel}>Category</label>
-        <select
+        <SearchableSelect
+          options={categoryOptions}
           value={filters.category}
-          onChange={(e) => onFilterChange({ category: e.target.value })}
-          className={styles.select}
-        >
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.name}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onFilterChange({ category: value })}
+          placeholder="All Categories"
+        />
       </div>
 
       {/* City Filter */}
       <div className={styles.filterGroup}>
         <label className={styles.filterLabel}>City</label>
-        <select
+        <SearchableSelect
+          options={cityOptions}
           value={filters.city}
-          onChange={(e) => onFilterChange({ city: e.target.value })}
-          className={styles.select}
-        >
-          <option value="">All Cities</option>
-          {cities.map((city) => (
-            <option key={city} value={city}>
-              {city}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onFilterChange({ city: value })}
+          placeholder="All Cities"
+        />
       </div>
 
       {/* Rating Filter */}

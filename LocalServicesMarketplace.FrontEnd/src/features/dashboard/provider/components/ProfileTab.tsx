@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Save, Plus, X, Loader2 } from "lucide-react";
-import {
-  type ProviderProfile,
-  providerService,
-} from "../../../../services/providerService";
+import { Save, Loader2, Plus, X } from "lucide-react";
 import { Button } from "../../../../components/common/Button";
 import { Input } from "../../../../components/common/Input";
+import { SearchableSelect } from "../../../../components/common/SearchableSelect";
+import {
+  providerService,
+  type ProviderProfile,
+  type UpdateProfileRequest,
+} from "../../../../services/providerService";
+import { countries } from "../../../../data/romania-locations";
 import toast from "react-hot-toast";
 import styles from "./ProfileTab.module.css";
 
@@ -29,6 +32,15 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
     postalCode: profile.postalCode || "",
   });
 
+  // Build city options from counties
+  const cityOptions = countries.flatMap((county) =>
+    county.cities.map((city) => ({
+      value: city.name,
+      label: city.name,
+      group: county.name,
+    }))
+  );
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -40,29 +52,31 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
     }));
   };
 
+  const handleCityChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      city: value,
+    }));
+  };
+
   const handleAddServiceArea = () => {
-    const trimmed = newServiceArea.trim();
-    if (trimmed && !formData.serviceAreas?.includes(trimmed)) {
-      setFormData((prev) => ({
-        ...prev,
-        serviceAreas: [...(prev.serviceAreas || []), trimmed],
-      }));
-      setNewServiceArea("");
+    if (!newServiceArea.trim()) return;
+    if (formData.serviceAreas.includes(newServiceArea.trim())) {
+      toast.error("This service area is already added");
+      return;
     }
+    setFormData((prev) => ({
+      ...prev,
+      serviceAreas: [...prev.serviceAreas, newServiceArea.trim()],
+    }));
+    setNewServiceArea("");
   };
 
   const handleRemoveServiceArea = (area: string) => {
     setFormData((prev) => ({
       ...prev,
-      serviceAreas: prev.serviceAreas?.filter((a) => a !== area) || [],
+      serviceAreas: prev.serviceAreas.filter((a) => a !== area),
     }));
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddServiceArea();
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,7 +84,19 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
 
     try {
       setLoading(true);
-      await providerService.updateProfile(formData);
+
+      const updateData: UpdateProfileRequest = {
+        businessName: formData.businessName || undefined,
+        businessDescription: formData.businessDescription || undefined,
+        phoneNumber: formData.phoneNumber || undefined,
+        hourlyRate: formData.hourlyRate,
+        serviceAreas: formData.serviceAreas,
+        address: formData.address || undefined,
+        city: formData.city || undefined,
+        postalCode: formData.postalCode || undefined,
+      };
+
+      await providerService.updateProfile(updateData);
       toast.success("Profile updated successfully!");
       onUpdate();
     } catch (err) {
@@ -83,15 +109,11 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.formSection}>
-        <h2 className={styles.sectionTitle}>Business Information</h2>
-        <p className={styles.sectionDescription}>
-          Update your business details to help customers find and learn about
-          your services.
-        </p>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        {/* Business Information */}
+        <div className={styles.formSection}>
+          <h3 className={styles.sectionTitle}>Business Information</h3>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Business Name */}
           <div className={styles.formGroup}>
             <label htmlFor="businessName" className={styles.label}>
               Business Name
@@ -99,13 +121,12 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
             <Input
               id="businessName"
               name="businessName"
-              value={formData.businessName || ""}
+              value={formData.businessName}
               onChange={handleChange}
               placeholder="Your business name"
             />
           </div>
 
-          {/* Business Description */}
           <div className={styles.formGroup}>
             <label htmlFor="businessDescription" className={styles.label}>
               Business Description
@@ -113,63 +134,61 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
             <textarea
               id="businessDescription"
               name="businessDescription"
-              value={formData.businessDescription || ""}
+              value={formData.businessDescription}
               onChange={handleChange}
-              placeholder="Describe your business and services..."
+              placeholder="Describe your services and experience..."
               className={styles.textarea}
               rows={4}
             />
-            <span className={styles.charCount}>
-              {formData.businessDescription?.length || 0}/500
-            </span>
           </div>
-
-          {/* Phone Number */}
-          <div className={styles.formGroup}>
-            <label htmlFor="phoneNumber" className={styles.label}>
-              Phone Number
-            </label>
-            <Input
-              id="phoneNumber"
-              name="phoneNumber"
-              type="tel"
-              value={formData.phoneNumber || ""}
-              onChange={handleChange}
-              placeholder="e.g., 0740 123 456"
-            />
-          </div>
-
-          {/* Hourly Rate */}
-          <div className={styles.formGroup}>
-            <label htmlFor="hourlyRate" className={styles.label}>
-              Hourly Rate (RON)
-            </label>
-            <Input
-              id="hourlyRate"
-              name="hourlyRate"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.hourlyRate || ""}
-              onChange={handleChange}
-              placeholder="e.g., 75.00"
-            />
-          </div>
-
-          {/* Location Section */}
-          <h3 className={styles.subTitle}>Location</h3>
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label htmlFor="city" className={styles.label}>
-                City
+              <label htmlFor="phoneNumber" className={styles.label}>
+                Phone Number
               </label>
               <Input
-                id="city"
-                name="city"
-                value={formData.city || ""}
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                value={formData.phoneNumber}
                 onChange={handleChange}
-                placeholder="Your city"
+                placeholder="e.g., 0740 123 456"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="hourlyRate" className={styles.label}>
+                Hourly Rate (RON)
+              </label>
+              <Input
+                id="hourlyRate"
+                name="hourlyRate"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.hourlyRate || ""}
+                onChange={handleChange}
+                placeholder="e.g., 50.00"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Location */}
+        <div className={styles.formSection}>
+          <h3 className={styles.sectionTitle}>Location</h3>
+
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <SearchableSelect
+                id="city"
+                label="City"
+                options={cityOptions}
+                value={formData.city}
+                onChange={handleCityChange}
+                placeholder="Select your city..."
+                groupBy
               />
             </div>
 
@@ -180,97 +199,101 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
               <Input
                 id="postalCode"
                 name="postalCode"
-                value={formData.postalCode || ""}
+                value={formData.postalCode}
                 onChange={handleChange}
-                placeholder="e.g., 700505"
+                placeholder="e.g., 700001"
               />
             </div>
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="address" className={styles.label}>
-              Address
+              Street Address
             </label>
             <Input
               id="address"
               name="address"
-              value={formData.address || ""}
+              value={formData.address}
               onChange={handleChange}
-              placeholder="Street address"
+              placeholder="Your business address"
             />
           </div>
+        </div>
 
-          {/* Service Areas */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Service Areas</label>
-            <p className={styles.fieldDescription}>
-              Add the areas where you provide services
-            </p>
+        {/* Service Areas */}
+        <div className={styles.formSection}>
+          <h3 className={styles.sectionTitle}>Service Areas</h3>
+          <p className={styles.sectionDescription}>
+            Add the areas where you provide services
+          </p>
 
-            <div className={styles.serviceAreasInput}>
-              <Input
-                value={newServiceArea}
-                onChange={(e) => setNewServiceArea(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Add a service area"
-              />
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleAddServiceArea}
-                disabled={!newServiceArea.trim()}
-              >
-                <Plus size={18} />
-              </Button>
-            </div>
-
-            {formData.serviceAreas && formData.serviceAreas.length > 0 && (
-              <div className={styles.serviceAreasTags}>
-                {formData.serviceAreas.map((area) => (
-                  <span key={area} className={styles.tag}>
-                    {area}
-                    <button
-                      type="button"
-                      className={styles.tagRemove}
-                      onClick={() => handleRemoveServiceArea(area)}
-                      aria-label={`Remove ${area}`}
-                    >
-                      <X size={14} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <div className={styles.formActions}>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 size={18} className={styles.spinner} />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={18} />
-                  Save Changes
-                </>
-              )}
+          <div className={styles.serviceAreasInput}>
+            <Input
+              value={newServiceArea}
+              onChange={(e) => setNewServiceArea(e.target.value)}
+              placeholder="Add a service area (e.g., Downtown, Northside)"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddServiceArea();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddServiceArea}
+            >
+              <Plus size={18} />
+              Add
             </Button>
           </div>
-        </form>
-      </div>
 
-      {/* Sidebar Info */}
+          {formData.serviceAreas.length > 0 && (
+            <div className={styles.serviceAreasTags}>
+              {formData.serviceAreas.map((area) => (
+                <span key={area} className={styles.serviceAreaTag}>
+                  {area}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveServiceArea(area)}
+                    className={styles.removeTagButton}
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Submit */}
+        <div className={styles.formActions}>
+          <Button type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 size={18} className={styles.spinner} />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={18} />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+
+      {/* Sidebar */}
       <div className={styles.sidebar}>
         <div className={styles.infoCard}>
           <h3 className={styles.infoTitle}>Profile Tips</h3>
           <ul className={styles.infoList}>
-            <li>Use a clear, professional business name</li>
-            <li>Write a detailed description of your services</li>
-            <li>Set competitive hourly rates for your area</li>
-            <li>Add all areas where you can provide services</li>
+            <li>Add a detailed business description</li>
+            <li>Set competitive hourly rates</li>
+            <li>List all areas you serve</li>
+            <li>Keep your contact info up to date</li>
           </ul>
         </div>
 
