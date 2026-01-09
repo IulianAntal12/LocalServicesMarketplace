@@ -8,10 +8,11 @@ import {
 import { ProviderHeader } from "./components/ProviderHeader";
 import { ProviderServices } from "./components/ProviderServices";
 import { ProviderPortfolio } from "./components/ProviderPortfolio";
+import { ProviderReviews } from "./components/ProviderReviews";
 import { Button } from "../../components/common";
 import styles from "./ProviderProfilePage.module.css";
 
-type TabId = "services" | "portfolio" | "about";
+type TabId = "services" | "portfolio" | "reviews" | "about";
 
 export function ProviderProfilePage() {
   const { providerId } = useParams<{ providerId: string }>();
@@ -95,6 +96,14 @@ export function ProviderProfilePage() {
           </button>
           <button
             className={`${styles.tab} ${
+              activeTab === "reviews" ? styles.tabActive : ""
+            }`}
+            onClick={() => setActiveTab("reviews")}
+          >
+            Reviews ({provider.totalReviews})
+          </button>
+          <button
+            className={`${styles.tab} ${
               activeTab === "about" ? styles.tabActive : ""
             }`}
             onClick={() => setActiveTab("about")}
@@ -111,6 +120,13 @@ export function ProviderProfilePage() {
         )}
         {activeTab === "portfolio" && (
           <ProviderPortfolio images={provider.portfolioImages} />
+        )}
+        {activeTab === "reviews" && (
+          <ProviderReviews
+            providerId={provider.id}
+            providerName={provider.businessName || provider.fullName}
+            services={provider.services}
+          />
         )}
         {activeTab === "about" && (
           <div className={styles.aboutSection}>
@@ -149,11 +165,12 @@ export function ProviderProfilePage() {
                 )}
                 {provider.email && (
                   <div className={styles.contactRow}>
+                    <span className={styles.contactLabel}>Email: </span>
+
                     <a
                       href={`mailto:${provider.email}`}
                       className={styles.contactLink}
                     >
-                      <span className={styles.contactLabel}>Email: </span>
                       {provider.email}
                     </a>
                   </div>
