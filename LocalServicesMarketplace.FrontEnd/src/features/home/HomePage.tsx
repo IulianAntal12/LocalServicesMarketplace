@@ -22,7 +22,7 @@ import {
   providerService,
   type ProviderListItem,
 } from "../../services/providerService";
-import { counties } from "../../data/romania-locations";
+import { countries } from "../../data/romania-locations";
 import styles from "./HomePage.module.css";
 
 // Icon mapping for categories
@@ -72,7 +72,7 @@ export function HomePage() {
   const [loadingProviders, setLoadingProviders] = useState(true);
 
   // Get all cities from Romania data
-  const allCities = counties.flatMap((county) =>
+  const allCities = countries.flatMap((county) =>
     county.cities.map((city) => ({
       name: city.name,
       county: county.name,

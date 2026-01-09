@@ -13,7 +13,7 @@ export interface County {
   cities: City[];
 }
 
-export const counties: County[] = [
+export const countries: County[] = [
   {
     name: "Alba",
     code: "AB",
@@ -537,18 +537,18 @@ export const counties: County[] = [
 
 // Helper functions
 export const getAllCities = (): City[] => {
-  return counties.flatMap((county) => county.cities);
+  return countries.flatMap((county) => county.cities);
 };
 
 export const getCitiesByCounty = (countyName: string): City[] => {
-  const county = counties.find((c) => c.name === countyName);
+  const county = countries.find((c) => c.name === countyName);
   return county?.cities || [];
 };
 
 export const findCity = (
   cityName: string
 ): { city: City; county: County } | null => {
-  for (const county of counties) {
+  for (const county of countries) {
     const city = county.cities.find((c) => c.name === cityName);
     if (city) {
       return { city, county };
@@ -557,8 +557,8 @@ export const findCity = (
   return null;
 };
 
-export const countyNames = counties.map((c) => c.name);
+export const countyNames = countries.map((c) => c.name);
 
 export const countyCodeMap = Object.fromEntries(
-  counties.map((c) => [c.name, c.code])
+  countries.map((c) => [c.name, c.code])
 );

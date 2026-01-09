@@ -8,6 +8,7 @@ import { LoginPage, RegisterPage } from "./features/auth";
 import "./styles/globals.css";
 import { ProviderDashboard } from "./features/dashboard";
 import { ProviderProfilePage } from "./features/providers";
+import { SearchPage } from "./features/search";
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -62,15 +63,15 @@ function App() {
               }
             />
 
-            {/* Placeholder routes - to be implemented */}
             <Route
               path="/search"
               element={
                 <Layout>
-                  <PlaceholderPage title="Search Services" />
+                  <SearchPage />
                 </Layout>
               }
             />
+
             <Route
               path="/providers/:providerId"
               element={
@@ -79,6 +80,7 @@ function App() {
                 </Layout>
               }
             />
+
             <Route
               path="/how-it-works"
               element={
@@ -87,6 +89,7 @@ function App() {
                 </Layout>
               }
             />
+
             <Route
               path="/become-provider"
               element={
@@ -95,6 +98,7 @@ function App() {
                 </Layout>
               }
             />
+
             <Route
               path="/dashboard"
               element={
@@ -103,6 +107,7 @@ function App() {
                 </Layout>
               }
             />
+
             <Route
               path="/dashboard/provider"
               element={

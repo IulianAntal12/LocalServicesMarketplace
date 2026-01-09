@@ -4,7 +4,7 @@ import { Wrench, Mail, ArrowLeft, MapPin, Phone } from "lucide-react";
 import { Button, Input, Select } from "../../components/common";
 import { useAuth } from "../../context";
 import { getErrorMessage } from "../../utils";
-import { counties, getCitiesByCounty } from "../../data/romania-locations";
+import { countries, getCitiesByCounty } from "../../data/romania-locations";
 import type { RegisterRequest } from "../../models";
 import styles from "./AuthPages.module.css";
 import toast from "react-hot-toast";
@@ -82,7 +82,7 @@ export function RegisterPage() {
 
   // County options for Select
   const countyOptions = useMemo(
-    () => counties.map((c) => ({ value: c.name, label: c.name })),
+    () => countries.map((c) => ({ value: c.name, label: c.name })),
     []
   );
 
