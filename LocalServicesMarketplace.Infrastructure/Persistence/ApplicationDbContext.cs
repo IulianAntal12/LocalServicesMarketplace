@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ServiceCategory> ServiceCategories { get; set; }
     public DbSet<PortfolioImage> PortfolioImages { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -147,6 +148,54 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany()
                 .HasForeignKey(r => r.ServiceId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Configure Booking
+        builder.Entity<Booking>(entity =>
+        {
+            entity.ToTable("Bookings");
+
+            entity.HasKey(b => b.Id);
+
+            // Relationships
+            entity.HasOne(b => b.Customer)
+                .WithMany(u => u.BookingsAsCustomer)
+                .HasForeignKey(b => b.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(b => b.Provider)
+                .WithMany(u => u.BookingsAsProvider)
+                .HasForeignKey(b => b.ProviderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(b => b.Service)
+                .WithMany()
+                .HasForeignKey(b => b.ServiceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Properties
+            entity.Property(b => b.QuotedPrice).HasPrecision(10, 2);
+            entity.Property(b => b.FinalPrice).HasPrecision(10, 2);
+            entity.Property(b => b.PriceType).HasMaxLength(20);
+            entity.Property(b => b.Address).HasMaxLength(200);
+            entity.Property(b => b.City).HasMaxLength(50);
+            entity.Property(b => b.PostalCode).HasMaxLength(20);
+            entity.Property(b => b.CustomerNotes).HasMaxLength(1000);
+            entity.Property(b => b.ProviderNotes).HasMaxLength(1000);
+            entity.Property(b => b.CancellationReason).HasMaxLength(500);
+            entity.Property(b => b.CancelledBy).HasMaxLength(450);
+            entity.Property(b => b.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            // Indexes
+            entity.HasIndex(b => b.CustomerId);
+            entity.HasIndex(b => b.ProviderId);
+            entity.HasIndex(b => b.ServiceId);
+            entity.HasIndex(b => b.Status);
+            entity.HasIndex(b => b.ScheduledDate);
+            entity.HasIndex(b => new { b.ProviderId, b.Status });
+            entity.HasIndex(b => new { b.CustomerId, b.Status });
         });
     }
 }

@@ -41,4 +41,7 @@ public class ApplicationUser : IdentityUser
 
     public List<Review> ReviewsReceived { get; set; } = [];
     public List<Review> ReviewsGiven { get; set; } = [];
+
+    public List<Booking> BookingsAsCustomer { get; set; } = [];
+    public List<Booking> BookingsAsProvider { get; set; } = [];
 }
