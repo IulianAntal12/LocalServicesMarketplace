@@ -4,6 +4,7 @@ export { providerService } from "./providerService";
 export { categoryService } from "./categoryService";
 export { portfolioService } from "./portfolioService";
 export { reviewService } from "./reviewService";
+export { bookingService } from "./bookingService";
 
 // Re-export types
 export type { Category } from "./categoryService";

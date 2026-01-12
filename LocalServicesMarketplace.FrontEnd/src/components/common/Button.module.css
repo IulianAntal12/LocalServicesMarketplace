@@ -17,6 +17,16 @@
 }
 
 /* Variants */
+.danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+}
+
+.danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
 .primary {
   background-color: var(--color-secondary);
   color: white;
