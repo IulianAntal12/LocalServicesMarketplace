@@ -63,6 +63,7 @@ public class BookingListItemDto
     // For customers - show provider info
     public required string ProviderName { get; set; }
     public string? ProviderBusinessName { get; set; }
+    public required string ProviderId { get; set; }
 
     // For providers - show customer info
     public required string CustomerName { get; set; }
@@ -136,6 +137,7 @@ public static class BookingExtensions
             Id = booking.Id,
             ProviderName = booking.Provider.FullName,
             ProviderBusinessName = booking.Provider.BusinessName,
+            ProviderId = booking.ProviderId,
             CustomerName = booking.Customer.FullName,
             ServiceName = booking.Service.Name,
             ServiceCategory = booking.Service.Category,

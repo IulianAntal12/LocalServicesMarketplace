@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Briefcase, Image, Loader2 } from "lucide-react";
+import { User, Briefcase, Image, Loader2, Calendar } from "lucide-react";
 import { useAuth } from "../../../context";
 import {
   providerService,
@@ -8,9 +8,10 @@ import {
 import { ProfileTab } from "./components/ProfileTab";
 import { ServicesTab } from "./components/ServicesTab";
 import { PortfolioTab } from "./components/PortfolioTab";
+import { BookingsTab } from "../../providers/components/BookingsTab";
 import styles from "./ProviderDashboard.module.css";
 
-type TabId = "profile" | "services" | "portfolio";
+type TabId = "profile" | "services" | "portfolio" | "bookings";
 
 interface Tab {
   id: TabId;
@@ -22,6 +23,7 @@ const tabs: Tab[] = [
   { id: "profile", label: "Profile", icon: User },
   { id: "services", label: "Services", icon: Briefcase },
   { id: "portfolio", label: "Portfolio", icon: Image },
+  { id: "bookings", label: "Programări", icon: Calendar },
 ];
 
 export function ProviderDashboard() {
@@ -151,6 +153,7 @@ export function ProviderDashboard() {
             onUpdate={handleProfileUpdate}
           />
         )}
+        {activeTab === "bookings" && <BookingsTab />}
       </div>
     </div>
   );

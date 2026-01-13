@@ -7,3 +7,4 @@ export { ReviewForm } from "./ReviewForm";
 export { StarRating } from "./StarRating";
 export { BookingsTab } from "./BookingsTab";
 export { BookingDetailsModal } from "./BookingDetailsModal";
+export { BookingModal } from "./BookingModal";

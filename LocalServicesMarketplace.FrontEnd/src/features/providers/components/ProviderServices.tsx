@@ -1,9 +1,16 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Clock, DollarSign, Tag } from "lucide-react";
 import type { ServiceDto } from "../../../services/providerService";
+import { useAuth } from "../../../context";
+import { Button } from "../../../components/common/Button";
+import { BookingModal } from "./BookingModal";
 import styles from "./ProviderServices.module.css";
 
 interface ProviderServicesProps {
   services: ServiceDto[];
+  providerId: string;
+  providerName: string;
 }
 
 const PRICE_TYPE_LABELS: Record<string, string> = {
@@ -12,7 +19,27 @@ const PRICE_TYPE_LABELS: Record<string, string> = {
   Quote: "Request Quote",
 };
 
-export function ProviderServices({ services }: ProviderServicesProps) {
+export function ProviderServices({
+  services,
+  providerId,
+  providerName,
+}: ProviderServicesProps) {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [selectedService, setSelectedService] = useState<ServiceDto | null>(
+    null
+  );
+  const [showBookingModal, setShowBookingModal] = useState(false);
+
+  const handleBookService = (service: ServiceDto) => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: `/providers/${providerId}` } });
+      return;
+    }
+    setSelectedService(service);
+    setShowBookingModal(true);
+  };
+
   const formatDuration = (minutes: number): string => {
     if (minutes < 60) {
       return `${minutes} min`;
@@ -68,13 +95,36 @@ export function ProviderServices({ services }: ProviderServicesProps) {
                   {formatDuration(service.estimatedDurationMinutes)}
                 </span>
               </div>
-              <span className={styles.priceType}>
-                {PRICE_TYPE_LABELS[service.priceType] || service.priceType}
-              </span>
+              <div className={styles.cardActions}>
+                <span className={styles.priceType}>
+                  {PRICE_TYPE_LABELS[service.priceType] || service.priceType}
+                </span>
+                <Button size="sm" onClick={() => handleBookService(service)}>
+                  Programează
+                </Button>
+              </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Booking Modal */}
+      {selectedService && (
+        <BookingModal
+          isOpen={showBookingModal}
+          onClose={() => {
+            setShowBookingModal(false);
+            setSelectedService(null);
+          }}
+          onSuccess={() => {
+            setShowBookingModal(false);
+            setSelectedService(null);
+          }}
+          providerId={providerId}
+          providerName={providerName}
+          service={selectedService}
+        />
+      )}
     </div>
   );
 }

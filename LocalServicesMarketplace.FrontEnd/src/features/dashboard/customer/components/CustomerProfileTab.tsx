@@ -1,11 +1,55 @@
-import { User, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, MapPin, Loader2 } from "lucide-react";
 import { useAuth } from "../../../../context";
 import { Button } from "../../../../components/common/Button";
+import { bookingService } from "../../../../services/bookingService";
+import { reviewService } from "../../../../services/reviewService";
 import toast from "react-hot-toast";
 import styles from "./CustomerProfileTab.module.css";
 
 export function CustomerProfileTab() {
   const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalBookings: 0,
+    totalReviews: 0,
+    providersContacted: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch bookings stats
+        const bookingsResponse = await bookingService.getMyBookings({
+          role: "customer",
+        });
+
+        // Fetch reviews
+        const reviews = await reviewService.getMyReviews();
+
+        // Calculate unique providers contacted (from bookings)
+        const uniqueProviders = new Set(
+          bookingsResponse.bookings.map((b) => b.providerName)
+        );
+
+        setStats({
+          totalBookings:
+            bookingsResponse.stats?.total || bookingsResponse.bookings.length,
+          totalReviews: reviews.length,
+          providersContacted: uniqueProviders.size,
+        });
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+        // Keep default values on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -52,15 +96,33 @@ export function CustomerProfileTab() {
           </h3>
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>-</span>
+              <span className={styles.statValue}>
+                {loading ? (
+                  <Loader2 size={20} className={styles.spinner} />
+                ) : (
+                  stats.totalBookings
+                )}
+              </span>
               <span className={styles.statLabel}>Programări totale</span>
             </div>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>-</span>
+              <span className={styles.statValue}>
+                {loading ? (
+                  <Loader2 size={20} className={styles.spinner} />
+                ) : (
+                  stats.totalReviews
+                )}
+              </span>
               <span className={styles.statLabel}>Recenzii scrise</span>
             </div>
             <div className={styles.statCard}>
-              <span className={styles.statValue}>-</span>
+              <span className={styles.statValue}>
+                {loading ? (
+                  <Loader2 size={20} className={styles.spinner} />
+                ) : (
+                  stats.providersContacted
+                )}
+              </span>
               <span className={styles.statLabel}>Prestatori contactați</span>
             </div>
           </div>

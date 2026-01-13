@@ -21,8 +21,8 @@ export function LoginPage() {
     general?: string;
   }>({});
 
-  const from =
-    (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
+  // Get the redirect path from location state
+  const from = (location.state as { from?: string })?.from;
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -52,7 +52,26 @@ export function LoginPage() {
     try {
       await login({ email, password });
       toast.success("Welcome back!");
-      navigate(from, { replace: true });
+
+      // Redirect based on user role if no specific redirect path
+      if (from) {
+        navigate(from, { replace: true });
+      } else {
+        // Get user from localStorage after login
+        const storedUser = localStorage.getItem("user");
+        const userData = storedUser ? JSON.parse(storedUser) : null;
+
+        const isProvider = userData?.roles?.includes("Provider");
+        const isCustomer = userData?.roles?.includes("Customer");
+
+        if (isProvider) {
+          navigate("/dashboard/provider", { replace: true });
+        } else if (isCustomer) {
+          navigate("/dashboard/customer", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
+      }
     } catch (error) {
       const message = getErrorMessage(error, "Invalid email or password");
       setErrors({ general: message });

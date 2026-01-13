@@ -48,6 +48,7 @@ export interface BookingListItem {
   id: number;
   providerName: string;
   providerBusinessName?: string;
+  providerId: string;
   customerName: string;
   serviceName: string;
   serviceCategory: string;

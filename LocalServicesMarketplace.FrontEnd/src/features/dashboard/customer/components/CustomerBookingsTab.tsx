@@ -248,7 +248,7 @@ export function CustomerBookingsTab() {
                     {booking.canReview && (
                       <Button
                         size="sm"
-                        onClick={() => handleWriteReview(booking.providerName)}
+                        onClick={() => handleWriteReview(booking.providerId)}
                       >
                         <Star size={14} />
                         Scrie recenzie

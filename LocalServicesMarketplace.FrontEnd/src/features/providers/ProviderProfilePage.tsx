@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2, ArrowLeft } from "lucide-react";
 import {
   providerService,
@@ -12,15 +12,15 @@ import { ProviderReviews } from "./components/ProviderReviews";
 import { Button } from "../../components/common";
 import styles from "./ProviderProfilePage.module.css";
 
-type TabId = "services" | "portfolio" | "reviews" | "about";
-
 export function ProviderProfilePage() {
   const { providerId } = useParams<{ providerId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [provider, setProvider] = useState<ProviderProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabId>("services");
+  const initialTab = searchParams.get("tab") || "services";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const fetchProvider = useCallback(async () => {
     if (!providerId) {
@@ -41,6 +41,16 @@ export function ProviderProfilePage() {
       setLoading(false);
     }
   }, [providerId]);
+
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (
+      tabFromUrl &&
+      ["services", "portfolio", "reviews", "about"].includes(tabFromUrl)
+    ) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchProvider();
@@ -121,7 +131,11 @@ export function ProviderProfilePage() {
       {/* Tab Content */}
       <div className={styles.content}>
         {activeTab === "services" && (
-          <ProviderServices services={activeServices} />
+          <ProviderServices
+            services={activeServices}
+            providerId={provider.id}
+            providerName={provider.businessName || provider.fullName}
+          />
         )}
         {activeTab === "portfolio" && (
           <ProviderPortfolio images={provider.portfolioImages} />

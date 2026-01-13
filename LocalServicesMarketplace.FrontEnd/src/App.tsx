@@ -3,12 +3,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context";
 import { Layout } from "./components/layout";
+import { ProtectedRoute, RedirectIfAuthenticated } from "./components/common";
 import { HomePage } from "./features/home";
 import { LoginPage, RegisterPage } from "./features/auth";
-import "./styles/globals.css";
-import { ProviderDashboard } from "./features/dashboard";
+import { ProviderDashboard, CustomerDashboard } from "./features/dashboard";
 import { ProviderProfilePage } from "./features/providers";
 import { SearchPage } from "./features/search";
+import "./styles/globals.css";
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -49,11 +50,25 @@ function App() {
             }}
           />
           <Routes>
-            {/* Auth routes - no layout */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            {/* Auth routes - redirect if already logged in */}
+            <Route
+              path="/login"
+              element={
+                <RedirectIfAuthenticated>
+                  <LoginPage />
+                </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <RedirectIfAuthenticated>
+                  <RegisterPage />
+                </RedirectIfAuthenticated>
+              }
+            />
 
-            {/* Main routes with layout */}
+            {/* Public routes */}
             <Route
               path="/"
               element={
@@ -99,20 +114,37 @@ function App() {
               }
             />
 
+            {/* Protected routes - Customer only */}
             <Route
               path="/dashboard"
               element={
                 <Layout>
-                  <PlaceholderPage title="Customer Dashboard" />
+                  <ProtectedRoute allowedRoles={["Customer"]}>
+                    <CustomerDashboard />
+                  </ProtectedRoute>
                 </Layout>
               }
             />
 
             <Route
+              path="/dashboard/customer"
+              element={
+                <Layout>
+                  <ProtectedRoute allowedRoles={["Customer"]}>
+                    <CustomerDashboard />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+
+            {/* Protected routes - Provider only */}
+            <Route
               path="/dashboard/provider"
               element={
                 <Layout>
-                  <ProviderDashboard />
+                  <ProtectedRoute allowedRoles={["Provider"]}>
+                    <ProviderDashboard />
+                  </ProtectedRoute>
                 </Layout>
               }
             />
@@ -199,6 +231,7 @@ function NotFoundPage() {
       <p style={{ color: "var(--color-text-muted)", marginBottom: "24px" }}>
         The page you're looking for doesn't exist or has been moved.
       </p>
+
       <a
         href="/"
         style={{

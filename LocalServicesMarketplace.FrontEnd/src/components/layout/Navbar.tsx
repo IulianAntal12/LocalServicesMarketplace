@@ -6,13 +6,20 @@ import { useAuth } from "../../context";
 import styles from "./Navbar.module.css";
 
 export function Navbar() {
-  const { isAuthenticated, user, logout, isProvider } = useAuth();
+  const { isAuthenticated, user, logout, isProvider, isCustomer } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  // Dynamic dashboard link based on user role
+  const getDashboardLink = () => {
+    if (isProvider) return "/dashboard/provider";
+    if (isCustomer) return "/dashboard/customer";
+    return "/dashboard";
   };
 
   return (
@@ -43,10 +50,7 @@ export function Navbar() {
         <div className={styles.authButtons}>
           {isAuthenticated ? (
             <>
-              <Link
-                to={isProvider ? "/dashboard/provider" : "/dashboard"}
-                className={styles.navLink}
-              >
+              <Link to={getDashboardLink()} className={styles.navLink}>
                 Dashboard
               </Link>
               <span className={styles.userName}>
@@ -113,7 +117,7 @@ export function Navbar() {
           {isAuthenticated ? (
             <>
               <Link
-                to={isProvider ? "/dashboard/provider" : "/dashboard"}
+                to={getDashboardLink()}
                 className={styles.mobileNavLink}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
