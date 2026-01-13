@@ -5,6 +5,7 @@ export { categoryService } from "./categoryService";
 export { portfolioService } from "./portfolioService";
 export { reviewService } from "./reviewService";
 export { bookingService } from "./bookingService";
+export { notificationService } from "./notificationService";
 
 // Re-export types
 export type { Category } from "./categoryService";
@@ -15,3 +16,8 @@ export type {
   CreateReviewRequest,
   UpdateReviewRequest,
 } from "./reviewService";
+export type {
+  NotificationDto,
+  NotificationSummary,
+  GetNotificationsResponse,
+} from "./notificationService";

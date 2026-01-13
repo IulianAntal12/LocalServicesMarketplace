@@ -1,14 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Wrench, Menu, X } from "lucide-react";
+import { Wrench, Menu, X, Bell } from "lucide-react";
 import { Button } from "../common";
 import { useAuth } from "../../context";
+import { notificationService } from "../../services/notificationService";
 import styles from "./Navbar.module.css";
 
 export function Navbar() {
   const { isAuthenticated, user, logout, isProvider, isCustomer } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread notifications count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (!isAuthenticated) return;
+      try {
+        const summary = await notificationService.getSummary();
+        setUnreadCount(summary.unreadCount);
+      } catch (error) {
+        console.error("Error fetching notification count:", error);
+      }
+    };
+
+    fetchUnreadCount();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     logout();
@@ -50,6 +70,18 @@ export function Navbar() {
         <div className={styles.authButtons}>
           {isAuthenticated ? (
             <>
+              <Link
+                to={`${getDashboardLink()}?tab=notifications`}
+                className={styles.notificationLink}
+                title="Notificări"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className={styles.notificationBadge}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </Link>
               <Link to={getDashboardLink()} className={styles.navLink}>
                 Dashboard
               </Link>

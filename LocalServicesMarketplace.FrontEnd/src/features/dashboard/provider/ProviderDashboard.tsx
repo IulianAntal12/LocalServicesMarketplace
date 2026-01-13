@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { User, Briefcase, Image, Loader2, Calendar } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { User, Briefcase, Image, Loader2, Calendar, Bell } from "lucide-react";
 import { useAuth } from "../../../context";
 import {
   providerService,
@@ -9,9 +10,15 @@ import { ProfileTab } from "./components/ProfileTab";
 import { ServicesTab } from "./components/ServicesTab";
 import { PortfolioTab } from "./components/PortfolioTab";
 import { BookingsTab } from "../../providers/components/BookingsTab";
+import { NotificationsTab } from "../common/NotificationsTab";
 import styles from "./ProviderDashboard.module.css";
 
-type TabId = "profile" | "services" | "portfolio" | "bookings";
+type TabId =
+  | "profile"
+  | "services"
+  | "portfolio"
+  | "bookings"
+  | "notifications";
 
 interface Tab {
   id: TabId;
@@ -24,14 +31,24 @@ const tabs: Tab[] = [
   { id: "services", label: "Services", icon: Briefcase },
   { id: "portfolio", label: "Portfolio", icon: Image },
   { id: "bookings", label: "Programări", icon: Calendar },
+  { id: "notifications", label: "Notificări", icon: Bell },
 ];
 
 export function ProviderDashboard() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Handle tab from URL
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab") as TabId | null;
+    if (tabFromUrl && tabs.some((t) => t.id === tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
 
   const fetchProfile = async () => {
     try {
@@ -154,6 +171,7 @@ export function ProviderDashboard() {
           />
         )}
         {activeTab === "bookings" && <BookingsTab />}
+        {activeTab === "notifications" && <NotificationsTab />}
       </div>
     </div>
   );

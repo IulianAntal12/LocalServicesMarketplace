@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Calendar, Star, User } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Calendar, Star, User, Bell } from "lucide-react";
 import { useAuth } from "../../../context";
 import { CustomerBookingsTab } from "./components/CustomerBookingsTab";
 import { CustomerReviewsTab } from "./components/CustomerReviewsTab";
 import { CustomerProfileTab } from "./components/CustomerProfileTab";
+import { NotificationsTab } from "../common/NotificationsTab";
 import styles from "./CustomerDashboard.module.css";
 
-type TabId = "bookings" | "reviews" | "profile";
+type TabId = "bookings" | "reviews" | "profile" | "notifications";
 
 interface Tab {
   id: TabId;
@@ -17,12 +19,24 @@ interface Tab {
 const tabs: Tab[] = [
   { id: "bookings", label: "Programări", icon: Calendar },
   { id: "reviews", label: "Recenzii", icon: Star },
+  { id: "notifications", label: "Notificări", icon: Bell },
   { id: "profile", label: "Profil", icon: User },
 ];
 
+const getInitialTab = (searchParams: URLSearchParams): TabId => {
+  const tabFromUrl = searchParams.get("tab") as TabId | null;
+  if (tabFromUrl && tabs.some((t) => t.id === tabFromUrl)) {
+    return tabFromUrl;
+  }
+  return "bookings";
+};
+
 export function CustomerDashboard() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabId>("bookings");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<TabId>(() =>
+    getInitialTab(searchParams)
+  );
 
   const renderContent = () => {
     switch (activeTab) {
@@ -30,6 +44,8 @@ export function CustomerDashboard() {
         return <CustomerBookingsTab />;
       case "reviews":
         return <CustomerReviewsTab />;
+      case "notifications":
+        return <NotificationsTab />;
       case "profile":
         return <CustomerProfileTab />;
       default:
