@@ -59,7 +59,7 @@ export function NotificationsTab() {
       setSummary(response.summary);
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      toast.error("Nu s-au putut încărca notificările");
+      toast.error("Failed to load notifications");
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,9 @@ export function NotificationsTab() {
         prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
       );
       setSummary((prev) =>
-        prev ? { ...prev, unreadCount: Math.max(0, prev.unreadCount - 1) } : null
+        prev
+          ? { ...prev, unreadCount: Math.max(0, prev.unreadCount - 1) }
+          : null
       );
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -91,11 +93,11 @@ export function NotificationsTab() {
     try {
       setMarkingAll(true);
       await notificationService.markAllAsRead();
-      toast.success("Toate notificările au fost marcate ca citite");
+      toast.success("All notifications marked as read");
       fetchNotifications();
     } catch (error) {
       console.error("Error marking all as read:", error);
-      toast.error("Eroare la marcarea notificărilor");
+      toast.error("Error marking notifications");
     } finally {
       setMarkingAll(false);
     }
@@ -121,10 +123,12 @@ export function NotificationsTab() {
         <div className={styles.headerLeft}>
           <h2 className={styles.title}>
             <Bell size={24} />
-            Notificări
+            Notifications
           </h2>
           {summary && summary.unreadCount > 0 && (
-            <span className={styles.unreadBadge}>{summary.unreadCount} necitite</span>
+            <span className={styles.unreadBadge}>
+              {summary.unreadCount} unread
+            </span>
           )}
         </div>
         {summary && summary.unreadCount > 0 && (
@@ -139,7 +143,7 @@ export function NotificationsTab() {
             ) : (
               <CheckCircle size={14} />
             )}
-            Marchează toate ca citite
+            Mark all as read
           </Button>
         )}
       </div>
@@ -152,7 +156,7 @@ export function NotificationsTab() {
           }`}
           onClick={() => setActiveFilter("all")}
         >
-          Toate ({summary?.totalCount || 0})
+          All ({summary?.totalCount || 0})
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -160,7 +164,7 @@ export function NotificationsTab() {
           }`}
           onClick={() => setActiveFilter("unread")}
         >
-          Necitite ({summary?.unreadCount || 0})
+          Unread ({summary?.unreadCount || 0})
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -168,7 +172,7 @@ export function NotificationsTab() {
           }`}
           onClick={() => setActiveFilter("read")}
         >
-          Citite ({(summary?.totalCount || 0) - (summary?.unreadCount || 0)})
+          Read ({(summary?.totalCount || 0) - (summary?.unreadCount || 0)})
         </button>
       </div>
 
@@ -176,18 +180,18 @@ export function NotificationsTab() {
       {loading ? (
         <div className={styles.loadingState}>
           <Loader2 className={styles.spinner} size={32} />
-          <p>Se încarcă notificările...</p>
+          <p>Loading notifications...</p>
         </div>
       ) : notifications.length === 0 ? (
         <div className={styles.emptyState}>
           <BellOff size={48} />
-          <h3>Nu ai notificări</h3>
+          <h3>No notifications</h3>
           <p>
             {activeFilter === "all"
-              ? "Nu ai primit încă nicio notificare."
+              ? "You haven't received any notifications yet."
               : activeFilter === "unread"
-              ? "Nu ai notificări necitite."
-              : "Nu ai notificări citite."}
+              ? "You have no unread notifications."
+              : "You have no read notifications."}
           </p>
         </div>
       ) : (
@@ -206,7 +210,9 @@ export function NotificationsTab() {
                   className={styles.iconWrapper}
                   style={{ backgroundColor: `${typeConfig.color}15` }}
                 >
-                  <span style={{ color: typeConfig.color }}>{typeConfig.icon}</span>
+                  <span style={{ color: typeConfig.color }}>
+                    {typeConfig.icon}
+                  </span>
                 </div>
                 <div className={styles.content}>
                   <div className={styles.titleRow}>

@@ -176,11 +176,11 @@ export function BookingModal({
 
     switch (priceType) {
       case "Hourly":
-        return `${formatted}/oră`;
+        return `${formatted}/hour`;
       case "Fixed":
         return formatted;
       case "Quote":
-        return "Preț la cerere";
+        return "Quote on request";
       default:
         return formatted;
     }
@@ -190,7 +190,7 @@ export function BookingModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={step === 1 ? "Alege data și ora" : "Detalii programare"}
+      title={step === 1 ? "Choose date and time" : "Booking details"}
       size="medium"
     >
       <div className={styles.container}>
@@ -235,13 +235,13 @@ export function BookingModal({
             <div className={styles.slotsSection}>
               <h4 className={styles.slotsTitle}>
                 <Clock size={18} />
-                Ore disponibile
+                Available times
               </h4>
 
               {loadingSlots ? (
                 <div className={styles.loadingSlots}>
                   <Loader2 className={styles.spinner} size={24} />
-                  <span>Se încarcă...</span>
+                  <span>Loading...</span>
                 </div>
               ) : availableSlots.length > 0 ? (
                 <div className={styles.slotsGrid}>
@@ -261,8 +261,8 @@ export function BookingModal({
                 </div>
               ) : (
                 <div className={styles.noSlots}>
-                  <p>Nu există ore disponibile pentru această zi.</p>
-                  <p>Încearcă o altă dată.</p>
+                  <p>No available times for this day.</p>
+                  <p>Try another date.</p>
                 </div>
               )}
             </div>
@@ -270,10 +270,10 @@ export function BookingModal({
             {/* Continue Button */}
             <div className={styles.actions}>
               <Button variant="outline" onClick={onClose}>
-                Anulează
+                Cancel
               </Button>
               <Button onClick={handleContinue} disabled={!selectedSlot}>
-                Continuă
+                Continue
               </Button>
             </div>
           </>
@@ -298,13 +298,13 @@ export function BookingModal({
               <div className={styles.formSection}>
                 <h4 className={styles.formSectionTitle}>
                   <MapPin size={18} />
-                  Locație (unde se va efectua serviciul)
+                  Location (where the service will be performed)
                 </h4>
 
                 <Input
                   name="address"
-                  label="Adresă"
-                  placeholder="Str. Exemplu, Nr. 10, Bl. A1"
+                  label="Address"
+                  placeholder="Example St., No. 10, Bldg. A1"
                   value={formData.address}
                   onChange={handleInputChange}
                 />
@@ -312,14 +312,14 @@ export function BookingModal({
                 <div className={styles.formRow}>
                   <Input
                     name="city"
-                    label="Oraș"
-                    placeholder="București"
+                    label="City"
+                    placeholder="Bucharest"
                     value={formData.city}
                     onChange={handleInputChange}
                   />
                   <Input
                     name="postalCode"
-                    label="Cod poștal"
+                    label="Postal Code"
                     placeholder="010101"
                     value={formData.postalCode}
                     onChange={handleInputChange}
@@ -330,12 +330,12 @@ export function BookingModal({
               <div className={styles.formSection}>
                 <h4 className={styles.formSectionTitle}>
                   <FileText size={18} />
-                  Note pentru prestator
+                  Notes for provider
                 </h4>
                 <textarea
                   name="customerNotes"
                   className={styles.textarea}
-                  placeholder="Descrieți problema sau cerințele speciale..."
+                  placeholder="Describe the problem or special requirements..."
                   rows={4}
                   value={formData.customerNotes}
                   onChange={handleInputChange}
@@ -350,16 +350,16 @@ export function BookingModal({
             {/* Actions */}
             <div className={styles.actions}>
               <Button variant="outline" onClick={handleBack}>
-                Înapoi
+                Back
               </Button>
               <Button onClick={handleSubmit} disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 size={18} className={styles.spinner} />
-                    Se trimite...
+                    Sending...
                   </>
                 ) : (
-                  "Trimite cererea"
+                  "Send request"
                 )}
               </Button>
             </div>

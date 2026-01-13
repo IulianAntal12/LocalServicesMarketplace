@@ -70,11 +70,11 @@ export function CustomerProfileTab() {
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>
             <User size={18} />
-            Informații cont
+            Account Information
           </h3>
           <div className={styles.infoGrid}>
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Nume complet</span>
+              <span className={styles.infoLabel}>Full Name</span>
               <span className={styles.infoValue}>{user?.fullName || "-"}</span>
             </div>
             <div className={styles.infoItem}>
@@ -82,8 +82,8 @@ export function CustomerProfileTab() {
               <span className={styles.infoValue}>{user?.email || "-"}</span>
             </div>
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Tip cont</span>
-              <span className={styles.infoValue}>Client</span>
+              <span className={styles.infoLabel}>Account Type</span>
+              <span className={styles.infoValue}>Customer</span>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@ export function CustomerProfileTab() {
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>
             <MapPin size={18} />
-            Activitate
+            Activity
           </h3>
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
@@ -103,7 +103,7 @@ export function CustomerProfileTab() {
                   stats.totalBookings
                 )}
               </span>
-              <span className={styles.statLabel}>Programări totale</span>
+              <span className={styles.statLabel}>Total Bookings</span>
             </div>
             <div className={styles.statCard}>
               <span className={styles.statValue}>
@@ -113,7 +113,7 @@ export function CustomerProfileTab() {
                   stats.totalReviews
                 )}
               </span>
-              <span className={styles.statLabel}>Recenzii scrise</span>
+              <span className={styles.statLabel}>Reviews Written</span>
             </div>
             <div className={styles.statCard}>
               <span className={styles.statValue}>
@@ -123,20 +123,20 @@ export function CustomerProfileTab() {
                   stats.providersContacted
                 )}
               </span>
-              <span className={styles.statLabel}>Prestatori contactați</span>
+              <span className={styles.statLabel}>Providers Contacted</span>
             </div>
           </div>
         </div>
 
         {/* Account Actions */}
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Acțiuni cont</h3>
+          <h3 className={styles.sectionTitle}>Account Actions</h3>
           <div className={styles.actionsGrid}>
-            <Button variant="outline" onClick={() => toast("În curând!")}>
-              Schimbă parola
+            <Button variant="outline" onClick={() => toast("Coming soon!")}>
+              Change Password
             </Button>
-            <Button variant="outline" onClick={() => toast("În curând!")}>
-              Setări notificări
+            <Button variant="outline" onClick={() => toast("Coming soon!")}>
+              Notification Settings
             </Button>
           </div>
         </div>
@@ -144,7 +144,7 @@ export function CustomerProfileTab() {
 
       <div className={styles.footer}>
         <p className={styles.footerText}>
-          Membru din {new Date().getFullYear()}
+          Member since {new Date().getFullYear()}
         </p>
       </div>
     </div>

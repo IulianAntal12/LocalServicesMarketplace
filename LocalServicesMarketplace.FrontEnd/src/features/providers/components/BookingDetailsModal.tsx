@@ -29,13 +29,13 @@ interface BookingDetailsModalProps {
 }
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string }> = {
-  Pending: { label: "În așteptare", color: "#F59E0B" },
-  Confirmed: { label: "Confirmat", color: "#3B82F6" },
-  InProgress: { label: "În lucru", color: "#8B5CF6" },
-  Completed: { label: "Finalizat", color: "#10B981" },
-  Cancelled: { label: "Anulat", color: "#EF4444" },
-  Rejected: { label: "Respins", color: "#6B7280" },
-  NoShow: { label: "Neprezentare", color: "#6B7280" },
+  Pending: { label: "Pending", color: "#F59E0B" },
+  Confirmed: { label: "Confirmed", color: "#3B82F6" },
+  InProgress: { label: "In Progress", color: "#8B5CF6" },
+  Completed: { label: "Completed", color: "#10B981" },
+  Cancelled: { label: "Cancelled", color: "#EF4444" },
+  Rejected: { label: "Rejected", color: "#6B7280" },
+  NoShow: { label: "No Show", color: "#6B7280" },
 };
 
 export function BookingDetailsModal({
@@ -57,7 +57,7 @@ export function BookingDetailsModal({
       const data = await bookingService.getById(bookingId);
       setBooking(data);
     } catch {
-      toast.error("Nu s-au putut încărca detaliile");
+      toast.error("Failed to load details");
       onClose();
     } finally {
       setLoading(false);
@@ -78,17 +78,17 @@ export function BookingDetailsModal({
       await bookingService.updateStatus(bookingId, { newStatus });
       toast.success(
         newStatus === "Confirmed"
-          ? "Programare confirmată!"
+          ? "Booking confirmed!"
           : newStatus === "InProgress"
-          ? "Lucrul a început!"
+          ? "Work started!"
           : newStatus === "Completed"
-          ? "Programare finalizată!"
-          : "Programare respinsă"
+          ? "Booking completed!"
+          : "Booking rejected"
       );
       onStatusChange?.();
       onClose();
     } catch {
-      toast.error("Eroare la actualizare status");
+      toast.error("Error updating status");
     } finally {
       setActionLoading(false);
     }
@@ -100,11 +100,11 @@ export function BookingDetailsModal({
       await bookingService.cancel(bookingId, {
         cancellationReason: cancelReason || undefined,
       });
-      toast.success("Programare anulată");
+      toast.success("Booking cancelled");
       onStatusChange?.();
       onClose();
     } catch {
-      toast.error("Eroare la anulare");
+      toast.error("Error cancelling booking");
     } finally {
       setActionLoading(false);
     }
@@ -134,10 +134,10 @@ export function BookingDetailsModal({
 
   if (loading) {
     return (
-      <Modal isOpen={isOpen} onClose={onClose} title="Detalii programare">
+      <Modal isOpen={isOpen} onClose={onClose} title="Booking details">
         <div className={styles.loadingState}>
           <Loader2 className={styles.spinner} size={32} />
-          <p>Se încarcă...</p>
+          <p>Loading...</p>
         </div>
       </Modal>
     );
@@ -153,7 +153,7 @@ export function BookingDetailsModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Detalii programare"
+      title="Booking details"
       size="medium"
     >
       <div className={styles.container}>
@@ -170,7 +170,7 @@ export function BookingDetailsModal({
 
         {/* Service Info */}
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Serviciu</h3>
+          <h3 className={styles.sectionTitle}>Service</h3>
           <div className={styles.serviceCard}>
             <h4 className={styles.serviceName}>{booking.serviceName}</h4>
             <span className={styles.serviceCategory}>
@@ -181,7 +181,7 @@ export function BookingDetailsModal({
 
         {/* Date & Time */}
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Data și ora</h3>
+          <h3 className={styles.sectionTitle}>Date & Time</h3>
           <div className={styles.infoGrid}>
             <div className={styles.infoItem}>
               <Calendar size={18} />
@@ -197,7 +197,7 @@ export function BookingDetailsModal({
         {/* Contact Info */}
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>
-            {isProvider ? "Client" : "Prestator"}
+            {isProvider ? "Customer" : "Provider"}
           </h3>
           <div className={styles.contactCard}>
             <div className={styles.contactAvatar}>
@@ -228,7 +228,7 @@ export function BookingDetailsModal({
         {/* Location */}
         {(booking.address || booking.city) && (
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Locație</h3>
+            <h3 className={styles.sectionTitle}>Location</h3>
             <div className={styles.infoItem}>
               <MapPin size={18} />
               <span>
@@ -242,17 +242,17 @@ export function BookingDetailsModal({
 
         {/* Pricing */}
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Preț</h3>
+          <h3 className={styles.sectionTitle}>Price</h3>
           <div className={styles.priceCard}>
             <div className={styles.priceRow}>
-              <span>Preț estimat:</span>
+              <span>Estimated price:</span>
               <span className={styles.priceValue}>
                 {formatPrice(booking.quotedPrice)}
               </span>
             </div>
             {booking.finalPrice && (
               <div className={styles.priceRow}>
-                <span>Preț final:</span>
+                <span>Final price:</span>
                 <span className={styles.priceValue}>
                   {formatPrice(booking.finalPrice)}
                 </span>
@@ -265,16 +265,16 @@ export function BookingDetailsModal({
         {/* Notes */}
         {(booking.customerNotes || booking.providerNotes) && (
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Note</h3>
+            <h3 className={styles.sectionTitle}>Notes</h3>
             {booking.customerNotes && (
               <div className={styles.noteCard}>
-                <span className={styles.noteLabel}>De la client:</span>
+                <span className={styles.noteLabel}>From customer:</span>
                 <p className={styles.noteText}>{booking.customerNotes}</p>
               </div>
             )}
             {booking.providerNotes && (
               <div className={styles.noteCard}>
-                <span className={styles.noteLabel}>De la prestator:</span>
+                <span className={styles.noteLabel}>From provider:</span>
                 <p className={styles.noteText}>{booking.providerNotes}</p>
               </div>
             )}
@@ -284,7 +284,7 @@ export function BookingDetailsModal({
         {/* Cancellation Info */}
         {booking.status === "Cancelled" && booking.cancellationReason && (
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Motiv anulare</h3>
+            <h3 className={styles.sectionTitle}>Cancellation reason</h3>
             <p className={styles.cancellationReason}>
               {booking.cancellationReason}
             </p>
@@ -294,10 +294,10 @@ export function BookingDetailsModal({
         {/* Cancel Form */}
         {showCancelForm && (
           <div className={styles.cancelForm}>
-            <h3 className={styles.sectionTitle}>Anulează programarea</h3>
+            <h3 className={styles.sectionTitle}>Cancel booking</h3>
             <textarea
               className={styles.textarea}
-              placeholder="Motivul anulării (opțional)"
+              placeholder="Cancellation reason (optional)"
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               rows={3}
@@ -307,7 +307,7 @@ export function BookingDetailsModal({
                 variant="outline"
                 onClick={() => setShowCancelForm(false)}
               >
-                Înapoi
+                Back
               </Button>
               <Button
                 variant="danger"
@@ -317,7 +317,7 @@ export function BookingDetailsModal({
                 {actionLoading ? (
                   <Loader2 size={16} className={styles.spinner} />
                 ) : null}
-                Confirmă anularea
+                Confirm cancellation
               </Button>
             </div>
           </div>
@@ -333,7 +333,7 @@ export function BookingDetailsModal({
                   disabled={actionLoading}
                 >
                   <Check size={16} />
-                  Confirmă
+                  Confirm
                 </Button>
                 <Button
                   variant="outline"
@@ -341,7 +341,7 @@ export function BookingDetailsModal({
                   disabled={actionLoading}
                 >
                   <X size={16} />
-                  Respinge
+                  Reject
                 </Button>
               </>
             )}
@@ -352,7 +352,7 @@ export function BookingDetailsModal({
                 disabled={actionLoading}
               >
                 <Play size={16} />
-                Începe lucrul
+                Start work
               </Button>
             )}
 
@@ -362,18 +362,18 @@ export function BookingDetailsModal({
                 disabled={actionLoading}
               >
                 <CheckCircle size={16} />
-                Finalizează
+                Complete
               </Button>
             )}
 
             {canCancel && (
               <Button variant="danger" onClick={() => setShowCancelForm(true)}>
-                Anulează
+                Cancel
               </Button>
             )}
 
             <Button variant="outline" onClick={onClose}>
-              Închide
+              Close
             </Button>
           </div>
         )}

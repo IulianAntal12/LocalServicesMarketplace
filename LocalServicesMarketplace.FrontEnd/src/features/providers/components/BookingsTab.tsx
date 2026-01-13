@@ -26,24 +26,28 @@ const STATUS_CONFIG: Record<
   { label: string; color: string; icon: React.ReactNode }
 > = {
   Pending: {
-    label: "În așteptare",
+    label: "Pending",
     color: "#F59E0B",
     icon: <Clock size={14} />,
   },
   Confirmed: {
-    label: "Confirmat",
+    label: "Confirmed",
     color: "#3B82F6",
     icon: <Check size={14} />,
   },
-  InProgress: { label: "În lucru", color: "#8B5CF6", icon: <Play size={14} /> },
+  InProgress: {
+    label: "In Progress",
+    color: "#8B5CF6",
+    icon: <Play size={14} />,
+  },
   Completed: {
-    label: "Finalizat",
+    label: "Completed",
     color: "#10B981",
     icon: <CheckCircle size={14} />,
   },
-  Cancelled: { label: "Anulat", color: "#EF4444", icon: <X size={14} /> },
-  Rejected: { label: "Respins", color: "#6B7280", icon: <X size={14} /> },
-  NoShow: { label: "Neprezentare", color: "#6B7280", icon: <User size={14} /> },
+  Cancelled: { label: "Cancelled", color: "#EF4444", icon: <X size={14} /> },
+  Rejected: { label: "Rejected", color: "#6B7280", icon: <X size={14} /> },
+  NoShow: { label: "No Show", color: "#6B7280", icon: <User size={14} /> },
 };
 
 export function BookingsTab() {
@@ -70,7 +74,7 @@ export function BookingsTab() {
       setStats(response.stats);
     } catch (error) {
       console.error("Error fetching bookings:", error);
-      toast.error("Nu s-au putut încărca programările");
+      toast.error("Failed to load bookings");
     } finally {
       setLoading(false);
     }
@@ -84,10 +88,10 @@ export function BookingsTab() {
     try {
       setActionLoading(bookingId);
       await bookingService.updateStatus(bookingId, { newStatus: "Confirmed" });
-      toast.success("Programare confirmată!");
+      toast.success("Booking confirmed!");
       fetchBookings();
     } catch {
-      toast.error("Eroare la confirmare");
+      toast.error("Error confirming booking");
     } finally {
       setActionLoading(null);
     }
@@ -97,10 +101,10 @@ export function BookingsTab() {
     try {
       setActionLoading(bookingId);
       await bookingService.updateStatus(bookingId, { newStatus: "Rejected" });
-      toast.success("Programare respinsă");
+      toast.success("Booking rejected");
       fetchBookings();
     } catch {
-      toast.error("Eroare la respingere");
+      toast.error("Error rejecting booking");
     } finally {
       setActionLoading(null);
     }
@@ -110,10 +114,10 @@ export function BookingsTab() {
     try {
       setActionLoading(bookingId);
       await bookingService.updateStatus(bookingId, { newStatus: "InProgress" });
-      toast.success("Lucrul a început!");
+      toast.success("Work started!");
       fetchBookings();
     } catch {
-      toast.error("Eroare la actualizare");
+      toast.error("Error updating status");
     } finally {
       setActionLoading(null);
     }
@@ -123,10 +127,10 @@ export function BookingsTab() {
     try {
       setActionLoading(bookingId);
       await bookingService.updateStatus(bookingId, { newStatus: "Completed" });
-      toast.success("Programare finalizată!");
+      toast.success("Booking completed!");
       fetchBookings();
     } catch {
-      toast.error("Eroare la finalizare");
+      toast.error("Error completing booking");
     } finally {
       setActionLoading(null);
     }
@@ -170,7 +174,7 @@ export function BookingsTab() {
               ) : (
                 <Check size={14} />
               )}
-              Confirmă
+              Confirm
             </Button>
             <Button
               size="sm"
@@ -179,7 +183,7 @@ export function BookingsTab() {
               disabled={isLoading}
             >
               <X size={14} />
-              Respinge
+              Reject
             </Button>
           </div>
         );
@@ -196,7 +200,7 @@ export function BookingsTab() {
               ) : (
                 <Play size={14} />
               )}
-              Începe lucrul
+              Start work
             </Button>
           </div>
         );
@@ -213,7 +217,7 @@ export function BookingsTab() {
               ) : (
                 <CheckCircle size={14} />
               )}
-              Finalizează
+              Complete
             </Button>
           </div>
         );
@@ -229,19 +233,19 @@ export function BookingsTab() {
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <span className={styles.statValue}>{stats.pending}</span>
-            <span className={styles.statLabel}>În așteptare</span>
+            <span className={styles.statLabel}>Pending</span>
           </div>
           <div className={styles.statCard}>
             <span className={styles.statValue}>{stats.confirmed}</span>
-            <span className={styles.statLabel}>Confirmate</span>
+            <span className={styles.statLabel}>Confirmed</span>
           </div>
           <div className={styles.statCard}>
             <span className={styles.statValue}>{stats.inProgress}</span>
-            <span className={styles.statLabel}>În lucru</span>
+            <span className={styles.statLabel}>In Progress</span>
           </div>
           <div className={styles.statCard}>
             <span className={styles.statValue}>{stats.completed}</span>
-            <span className={styles.statLabel}>Finalizate</span>
+            <span className={styles.statLabel}>Completed</span>
           </div>
         </div>
       )}
@@ -254,7 +258,7 @@ export function BookingsTab() {
           }`}
           onClick={() => setActiveFilter("all")}
         >
-          Toate
+          All
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -262,7 +266,7 @@ export function BookingsTab() {
           }`}
           onClick={() => setActiveFilter("Pending")}
         >
-          În așteptare
+          Pending
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -270,7 +274,7 @@ export function BookingsTab() {
           }`}
           onClick={() => setActiveFilter("Confirmed")}
         >
-          Confirmate
+          Confirmed
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -278,7 +282,7 @@ export function BookingsTab() {
           }`}
           onClick={() => setActiveFilter("InProgress")}
         >
-          În lucru
+          In Progress
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -286,7 +290,7 @@ export function BookingsTab() {
           }`}
           onClick={() => setActiveFilter("Completed")}
         >
-          Finalizate
+          Completed
         </button>
       </div>
 
@@ -294,16 +298,16 @@ export function BookingsTab() {
       {loading ? (
         <div className={styles.loadingState}>
           <Loader2 className={styles.spinner} size={32} />
-          <p>Se încarcă programările...</p>
+          <p>Loading bookings...</p>
         </div>
       ) : bookings.length === 0 ? (
         <div className={styles.emptyState}>
           <Calendar size={48} />
-          <h3>Nu ai programări</h3>
+          <h3>No bookings</h3>
           <p>
             {activeFilter === "all"
-              ? "Nu ai nicio programare încă."
-              : `Nu ai programări cu status "${STATUS_CONFIG[activeFilter]?.label}".`}
+              ? "You don't have any bookings yet."
+              : `You have no bookings with status "${STATUS_CONFIG[activeFilter]?.label}".`}
           </p>
         </div>
       ) : (
@@ -363,7 +367,7 @@ export function BookingsTab() {
                     className={styles.viewDetailsBtn}
                     onClick={() => setSelectedBooking(booking.id)}
                   >
-                    Vezi detalii
+                    View details
                   </button>
                   {renderActions(booking)}
                 </div>

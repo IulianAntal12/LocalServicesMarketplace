@@ -17,10 +17,10 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { id: "bookings", label: "Programări", icon: Calendar },
-  { id: "reviews", label: "Recenzii", icon: Star },
-  { id: "notifications", label: "Notificări", icon: Bell },
-  { id: "profile", label: "Profil", icon: User },
+  { id: "bookings", label: "Bookings", icon: Calendar },
+  { id: "reviews", label: "Reviews", icon: Star },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "profile", label: "Profile", icon: User },
 ];
 
 const getInitialTab = (searchParams: URLSearchParams): TabId => {
@@ -63,7 +63,7 @@ export function CustomerDashboard() {
           </div>
           <div className={styles.userDetails}>
             <h2 className={styles.userName}>{user?.fullName}</h2>
-            <p className={styles.userRole}>Client</p>
+            <p className={styles.userRole}>Customer</p>
           </div>
         </div>
 

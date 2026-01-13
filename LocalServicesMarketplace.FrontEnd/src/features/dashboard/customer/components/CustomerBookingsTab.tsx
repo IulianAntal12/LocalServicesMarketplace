@@ -21,13 +21,13 @@ import toast from "react-hot-toast";
 import styles from "./CustomerBookingsTab.module.css";
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string }> = {
-  Pending: { label: "În așteptare", color: "#F59E0B" },
-  Confirmed: { label: "Confirmat", color: "#3B82F6" },
-  InProgress: { label: "În lucru", color: "#8B5CF6" },
-  Completed: { label: "Finalizat", color: "#10B981" },
-  Cancelled: { label: "Anulat", color: "#EF4444" },
-  Rejected: { label: "Respins", color: "#6B7280" },
-  NoShow: { label: "Neprezentare", color: "#6B7280" },
+  Pending: { label: "Pending", color: "#F59E0B" },
+  Confirmed: { label: "Confirmed", color: "#3B82F6" },
+  InProgress: { label: "In Progress", color: "#8B5CF6" },
+  Completed: { label: "Completed", color: "#10B981" },
+  Cancelled: { label: "Cancelled", color: "#EF4444" },
+  Rejected: { label: "Rejected", color: "#6B7280" },
+  NoShow: { label: "No Show", color: "#6B7280" },
 };
 
 export function CustomerBookingsTab() {
@@ -54,7 +54,7 @@ export function CustomerBookingsTab() {
       setStats(response.stats);
     } catch (error) {
       console.error("Error fetching bookings:", error);
-      toast.error("Nu s-au putut încărca programările");
+      toast.error("Failed to load bookings");
     } finally {
       setLoading(false);
     }
@@ -65,14 +65,14 @@ export function CustomerBookingsTab() {
   }, [fetchBookings]);
 
   const handleCancelBooking = async (bookingId: number) => {
-    if (!confirm("Sigur vrei să anulezi această programare?")) return;
+    if (!confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
       await bookingService.cancel(bookingId);
-      toast.success("Programare anulată");
+      toast.success("Booking cancelled");
       fetchBookings();
     } catch {
-      toast.error("Eroare la anulare");
+      toast.error("Error cancelling booking");
     }
   };
 
@@ -109,7 +109,7 @@ export function CustomerBookingsTab() {
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <span className={styles.statValue}>{stats.pending}</span>
-            <span className={styles.statLabel}>În așteptare</span>
+            <span className={styles.statLabel}>Pending</span>
           </div>
           <div className={styles.statCard}>
             <span className={styles.statValue}>
@@ -119,7 +119,7 @@ export function CustomerBookingsTab() {
           </div>
           <div className={styles.statCard}>
             <span className={styles.statValue}>{stats.completed}</span>
-            <span className={styles.statLabel}>Finalizate</span>
+            <span className={styles.statLabel}>Completed</span>
           </div>
           <div className={styles.statCard}>
             <span className={styles.statValue}>{stats.total}</span>
@@ -136,7 +136,7 @@ export function CustomerBookingsTab() {
           }`}
           onClick={() => setActiveFilter("all")}
         >
-          Toate
+          All
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -144,7 +144,7 @@ export function CustomerBookingsTab() {
           }`}
           onClick={() => setActiveFilter("Pending")}
         >
-          În așteptare
+          Pending
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -152,7 +152,7 @@ export function CustomerBookingsTab() {
           }`}
           onClick={() => setActiveFilter("Confirmed")}
         >
-          Confirmate
+          Confirmed
         </button>
         <button
           className={`${styles.filterChip} ${
@@ -160,7 +160,7 @@ export function CustomerBookingsTab() {
           }`}
           onClick={() => setActiveFilter("Completed")}
         >
-          Finalizate
+          Completed
         </button>
       </div>
 
@@ -168,18 +168,18 @@ export function CustomerBookingsTab() {
       {loading ? (
         <div className={styles.loadingState}>
           <Loader2 className={styles.spinner} size={32} />
-          <p>Se încarcă programările...</p>
+          <p>Loading bookings...</p>
         </div>
       ) : bookings.length === 0 ? (
         <div className={styles.emptyState}>
           <Calendar size={48} />
-          <h3>Nu ai programări</h3>
+          <h3>No bookings</h3>
           <p>
             {activeFilter === "all"
-              ? "Nu ai nicio programare încă. Caută un prestator și programează un serviciu!"
-              : `Nu ai programări cu status "${STATUS_CONFIG[activeFilter]?.label}".`}
+              ? "You don't have any bookings yet. Search for a provider and book a service!"
+              : `You have no bookings with status "${STATUS_CONFIG[activeFilter]?.label}".`}
           </p>
-          <Button onClick={() => navigate("/search")}>Caută prestatori</Button>
+          <Button onClick={() => navigate("/search")}>Search providers</Button>
         </div>
       ) : (
         <div className={styles.bookingsList}>
@@ -242,7 +242,7 @@ export function CustomerBookingsTab() {
                     className={styles.viewDetailsBtn}
                     onClick={() => setSelectedBooking(booking.id)}
                   >
-                    Vezi detalii
+                    View details
                   </button>
                   <div className={styles.actions}>
                     {booking.canReview && (
@@ -251,7 +251,7 @@ export function CustomerBookingsTab() {
                         onClick={() => handleWriteReview(booking.providerId)}
                       >
                         <Star size={14} />
-                        Scrie recenzie
+                        Write review
                       </Button>
                     )}
                     {canCancel && (
@@ -261,7 +261,7 @@ export function CustomerBookingsTab() {
                         onClick={() => handleCancelBooking(booking.id)}
                       >
                         <X size={14} />
-                        Anulează
+                        Cancel
                       </Button>
                     )}
                   </div>

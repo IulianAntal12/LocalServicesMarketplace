@@ -17,88 +17,86 @@ import styles from "./BecomeProviderPage.module.css";
 const benefits = [
   {
     icon: Users,
-    title: "Clienți noi",
+    title: "New customers",
     description:
-      "Ajungi la mii de clienți din zona ta care caută activ serviciile tale.",
+      "Reach thousands of customers in your area actively looking for your services.",
   },
   {
     icon: Calendar,
-    title: "Program flexibil",
+    title: "Flexible schedule",
     description:
-      "Tu decizi când și cât lucrezi. Acceptă programări când îți convine.",
+      "You decide when and how much you work. Accept bookings when it suits you.",
   },
   {
     icon: DollarSign,
-    title: "Venituri suplimentare",
-    description:
-      "Stabilește-ți propriile prețuri și crește-ți veniturile constant.",
+    title: "Additional income",
+    description: "Set your own prices and grow your income consistently.",
   },
   {
     icon: Star,
-    title: "Construiește-ți reputația",
+    title: "Build your reputation",
     description:
-      "Recenziile pozitive îți cresc vizibilitatea și atrag mai mulți clienți.",
+      "Positive reviews increase your visibility and attract more customers.",
   },
   {
     icon: Shield,
-    title: "Zero riscuri",
+    title: "Zero risks",
     description:
-      "Înscrierea e gratuită. Plătești doar un comision mic la finalizarea serviciului.",
+      "Registration is free. You only pay a small commission upon service completion.",
   },
   {
     icon: Clock,
-    title: "Gestionare simplă",
-    description: "Dashboard intuitiv pentru programări, clienți și statistici.",
+    title: "Simple management",
+    description: "Intuitive dashboard for bookings, customers, and statistics.",
   },
 ];
 
 const steps = [
   {
     number: "1",
-    title: "Creează un cont",
-    description:
-      "Înregistrează-te gratuit și selectează categoria ta de servicii.",
+    title: "Create an account",
+    description: "Register for free and select your service category.",
   },
   {
     number: "2",
-    title: "Completează profilul",
+    title: "Complete your profile",
     description:
-      "Adaugă descrierea serviciilor, prețuri, zone de acoperire și portofoliu.",
+      "Add service descriptions, prices, coverage areas, and portfolio.",
   },
   {
     number: "3",
-    title: "Primește programări",
+    title: "Receive bookings",
     description:
-      "Clienții te găsesc și îți trimit cereri. Tu alegi pe care le accepți.",
+      "Customers find you and send requests. You choose which ones to accept.",
   },
   {
     number: "4",
-    title: "Crește-ți afacerea",
+    title: "Grow your business",
     description:
-      "Oferă servicii de calitate, primește recenzii și atrage mai mulți clienți.",
+      "Provide quality services, receive reviews, and attract more customers.",
   },
 ];
 
 const stats = [
-  { value: "500+", label: "Profesioniști activi" },
-  { value: "10,000+", label: "Clienți mulțumiți" },
-  { value: "4.8", label: "Rating mediu" },
-  { value: "10+", label: "Categorii de servicii" },
+  { value: "500+", label: "Active professionals" },
+  { value: "10,000+", label: "Satisfied customers" },
+  { value: "4.8", label: "Average rating" },
+  { value: "10+", label: "Service categories" },
 ];
 
 const testimonials = [
   {
     quote:
-      "De când sunt pe LocalPro, am dublat numărul de clienți. Platforma e super ușor de folosit și clienții vin pregătiți.",
+      "Since joining LocalPro, I've doubled my number of customers. The platform is super easy to use and customers come prepared.",
     author: "Andrei M.",
-    role: "Instalator, București",
+    role: "Plumber, Bucharest",
     rating: 5,
   },
   {
     quote:
-      "Programările vin constant și pot să-mi gestionez singur timpul. Cel mai bun lucru e că nu trebuie să mai fac reclamă.",
+      "Bookings come in constantly and I can manage my time myself. The best part is I don't have to advertise anymore.",
     author: "Maria P.",
-    role: "Designer interior, Cluj",
+    role: "Interior Designer, Cluj",
     rating: 5,
   },
 ];
@@ -125,17 +123,18 @@ export function BecomeProviderPage() {
         <div className={styles.heroContent}>
           <span className={styles.heroBadge}>
             <TrendingUp size={16} />
-            Crește-ți afacerea
+            Grow your business
           </span>
-          <h1 className={styles.heroTitle}>Devino profesionist pe LocalPro</h1>
+          <h1 className={styles.heroTitle}>
+            Become a professional on LocalPro
+          </h1>
           <p className={styles.heroSubtitle}>
-            Conectează-te cu clienți din zona ta care au nevoie de serviciile
-            tale. Înscrierea e gratuită și poți începe să primești programări
-            chiar azi.
+            Connect with customers in your area who need your services.
+            Registration is free and you can start receiving bookings today.
           </p>
           <div className={styles.heroButtons}>
             <Button variant="secondary" size="lg" onClick={handleGetStarted}>
-              Începe acum
+              Start now
               <ArrowRight size={20} />
             </Button>
             <Button
@@ -144,7 +143,7 @@ export function BecomeProviderPage() {
               onClick={() => navigate("/how-it-works")}
               className={styles.outlineBtn}
             >
-              Cum funcționează
+              How it works
             </Button>
           </div>
         </div>
@@ -167,10 +166,9 @@ export function BecomeProviderPage() {
       {/* Benefits Section */}
       <section className={styles.benefitsSection}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>De ce să te alături LocalPro?</h2>
+          <h2 className={styles.sectionTitle}>Why join LocalPro?</h2>
           <p className={styles.sectionSubtitle}>
-            Totul de ce ai nevoie pentru a-ți crește afacerea într-un singur
-            loc.
+            Everything you need to grow your business in one place.
           </p>
           <div className={styles.benefitsGrid}>
             {benefits.map((benefit, index) => {
@@ -194,7 +192,7 @@ export function BecomeProviderPage() {
       {/* How It Works Section */}
       <section className={styles.stepsSection}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>Cum începi?</h2>
+          <h2 className={styles.sectionTitle}>How to get started?</h2>
           <div className={styles.stepsGrid}>
             {steps.map((step, index) => (
               <div key={index} className={styles.stepCard}>
@@ -210,7 +208,7 @@ export function BecomeProviderPage() {
       {/* Testimonials Section */}
       <section className={styles.testimonialsSection}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>Ce spun profesioniștii noștri</h2>
+          <h2 className={styles.sectionTitle}>What our professionals say</h2>
           <div className={styles.testimonialsGrid}>
             {testimonials.map((testimonial, index) => (
               <div key={index} className={styles.testimonialCard}>
@@ -238,49 +236,49 @@ export function BecomeProviderPage() {
           <div className={styles.checklistContent}>
             <div className={styles.checklistText}>
               <h2 className={styles.checklistTitle}>
-                Tot ce primești ca profesionist LocalPro
+                Everything you get as a LocalPro professional
               </h2>
               <ul className={styles.checklist}>
                 <li>
                   <CheckCircle size={20} />
-                  Profil profesional personalizat
+                  Personalized professional profile
                 </li>
                 <li>
                   <CheckCircle size={20} />
-                  Galerie portofoliu pentru lucrări
+                  Portfolio gallery for your work
                 </li>
                 <li>
                   <CheckCircle size={20} />
-                  Sistem de programări integrat
+                  Integrated booking system
                 </li>
                 <li>
                   <CheckCircle size={20} />
-                  Notificări instant pentru cereri noi
+                  Instant notifications for new requests
                 </li>
                 <li>
                   <CheckCircle size={20} />
-                  Dashboard cu statistici și analize
+                  Dashboard with statistics and analytics
                 </li>
                 <li>
                   <CheckCircle size={20} />
-                  Sistem de recenzii verificate
+                  Verified review system
                 </li>
                 <li>
                   <CheckCircle size={20} />
-                  Vizibilitate în căutări locale
+                  Visibility in local searches
                 </li>
                 <li>
                   <CheckCircle size={20} />
-                  Suport dedicat pentru profesioniști
+                  Dedicated support for professionals
                 </li>
               </ul>
             </div>
             <div className={styles.checklistCta}>
               <div className={styles.ctaCard}>
-                <h3>Gata să începi?</h3>
+                <h3>Ready to start?</h3>
                 <p>
-                  Înscrierea durează mai puțin de 5 minute și poți începe să
-                  primești clienți imediat.
+                  Registration takes less than 5 minutes and you can start
+                  receiving customers immediately.
                 </p>
                 <Button
                   variant="primary"
@@ -288,10 +286,10 @@ export function BecomeProviderPage() {
                   fullWidth
                   onClick={handleGetStarted}
                 >
-                  Creează cont gratuit
+                  Create free account
                 </Button>
                 <span className={styles.ctaNote}>
-                  Fără costuri ascunse • Anulezi oricând
+                  No hidden costs • Cancel anytime
                 </span>
               </div>
             </div>
@@ -302,15 +300,13 @@ export function BecomeProviderPage() {
       {/* Final CTA */}
       <section className={styles.finalCta}>
         <div className={styles.container}>
-          <h2 className={styles.finalCtaTitle}>
-            Alătură-te comunității LocalPro
-          </h2>
+          <h2 className={styles.finalCtaTitle}>Join the LocalPro community</h2>
           <p className={styles.finalCtaSubtitle}>
-            Sute de profesioniști își cresc deja afacerea cu noi. Tu când
-            începi?
+            Hundreds of professionals are already growing their business with
+            us. When will you start?
           </p>
           <Button variant="secondary" size="lg" onClick={handleGetStarted}>
-            Începe gratuit acum
+            Start free now
             <ArrowRight size={20} />
           </Button>
         </div>

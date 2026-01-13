@@ -92,8 +92,6 @@ export function SearchPage() {
 
     // Filter by category - check if provider has services in that category
     if (filters.category) {
-      // Note: We'd need to fetch services or have category info on provider
-      // For now, filter by checking if businessDescription mentions category
       const cat = filters.category.toLowerCase();
       result = result.filter(
         (p) =>

@@ -7,51 +7,51 @@ const steps = [
   {
     number: "01",
     icon: Search,
-    title: "Caută serviciul dorit",
+    title: "Search for the service you need",
     description:
-      "Folosește bara de căutare pentru a găsi exact ce ai nevoie. Filtrează după categorie, locație, preț sau rating pentru a găsi profesioniștii potriviți.",
+      "Use the search bar to find exactly what you need. Filter by category, location, price or rating to find the right professionals.",
   },
   {
     number: "02",
     icon: Calendar,
-    title: "Alege și programează",
+    title: "Choose and book",
     description:
-      "Compară profilurile, recenziile și portofoliile profesioniștilor. Când ai găsit persoana potrivită, programează-te direct din platformă la ora care ți se potrivește.",
+      "Compare profiles, reviews and portfolios of professionals. When you find the right person, book directly from the platform at a time that suits you.",
   },
   {
     number: "03",
     icon: ThumbsUp,
-    title: "Primește serviciul",
+    title: "Receive the service",
     description:
-      "Profesionistul vine la tine sau te întâlnești la locația convenită. Comunică direct prin platformă pentru orice detalii suplimentare.",
+      "The professional comes to you or you meet at the agreed location. Communicate directly through the platform for any additional details.",
   },
   {
     number: "04",
     icon: Star,
-    title: "Lasă o recenzie",
+    title: "Leave a review",
     description:
-      "După finalizarea serviciului, împărtășește experiența ta. Recenziile ajută alți clienți să aleagă și motivează profesioniștii să ofere servicii de calitate.",
+      "After completing the service, share your experience. Reviews help other customers choose and motivate professionals to provide quality services.",
   },
 ];
 
 const benefits = [
   {
     icon: Shield,
-    title: "Profesioniști verificați",
+    title: "Verified professionals",
     description:
-      "Toți furnizorii de servicii sunt verificați și au profiluri complete cu portofoliu și recenzii reale.",
+      "All service providers are verified and have complete profiles with portfolio and real reviews.",
   },
   {
     icon: Clock,
-    title: "Economisești timp",
+    title: "Save time",
     description:
-      "Nu mai pierde ore căutând recomandări. Găsește, compară și programează în câteva minute.",
+      "Don't waste hours looking for recommendations. Find, compare and book in minutes.",
   },
   {
     icon: Star,
-    title: "Recenzii reale",
+    title: "Real reviews",
     description:
-      "Citește experiențele altor clienți pentru a lua decizia corectă. Toate recenziile sunt de la utilizatori verificați.",
+      "Read other customers' experiences to make the right decision. All reviews are from verified users.",
   },
 ];
 
@@ -63,11 +63,11 @@ export function HowItWorksPage() {
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <h1 className={styles.heroTitle}>Cum funcționează LocalPro?</h1>
+          <h1 className={styles.heroTitle}>How does LocalPro work?</h1>
           <p className={styles.heroSubtitle}>
-            Găsește profesioniști locali de încredere în doar câțiva pași simpli.
-            Fie că ai nevoie de un instalator, electrician sau orice alt
-            serviciu, noi te conectăm cu cei mai buni din zona ta.
+            Find trusted local professionals in just a few simple steps. Whether
+            you need a plumber, electrician or any other service, we connect you
+            with the best in your area.
           </p>
         </div>
       </section>
@@ -75,7 +75,7 @@ export function HowItWorksPage() {
       {/* Steps Section */}
       <section className={styles.stepsSection}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>4 pași simpli</h2>
+          <h2 className={styles.sectionTitle}>4 simple steps</h2>
           <div className={styles.stepsGrid}>
             {steps.map((step, index) => {
               const Icon = step.icon;
@@ -97,7 +97,7 @@ export function HowItWorksPage() {
       {/* Benefits Section */}
       <section className={styles.benefitsSection}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>De ce LocalPro?</h2>
+          <h2 className={styles.sectionTitle}>Why LocalPro?</h2>
           <div className={styles.benefitsGrid}>
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon;
@@ -120,45 +120,41 @@ export function HowItWorksPage() {
       {/* FAQ Section */}
       <section className={styles.faqSection}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>Întrebări frecvente</h2>
+          <h2 className={styles.sectionTitle}>Frequently asked questions</h2>
           <div className={styles.faqGrid}>
             <div className={styles.faqItem}>
               <h4 className={styles.faqQuestion}>
-                Cât costă să folosesc platforma?
+                How much does it cost to use the platform?
               </h4>
               <p className={styles.faqAnswer}>
-                Utilizarea platformei este gratuită pentru clienți. Plătești
-                doar serviciul efectiv către profesionist, la prețul agreat.
+                Using the platform is free for customers. You only pay for the
+                actual service to the professional, at the agreed price.
               </p>
             </div>
             <div className={styles.faqItem}>
               <h4 className={styles.faqQuestion}>
-                Cum știu că profesionistul e de încredere?
+                How do I know the professional is trustworthy?
               </h4>
               <p className={styles.faqAnswer}>
-                Fiecare profesionist are un profil cu recenzii de la clienți
-                anteriori, rating și portofoliu de lucrări. Poți vedea
-                experiența lor înainte de a programa.
+                Each professional has a profile with reviews from previous
+                customers, rating and work portfolio. You can see their
+                experience before booking.
+              </p>
+            </div>
+            <div className={styles.faqItem}>
+              <h4 className={styles.faqQuestion}>Can I cancel a booking?</h4>
+              <p className={styles.faqAnswer}>
+                Yes, you can cancel a booking from your dashboard. Please cancel
+                at least 24 hours in advance to respect the professional's time.
               </p>
             </div>
             <div className={styles.faqItem}>
               <h4 className={styles.faqQuestion}>
-                Pot anula o programare?
+                What do I do if I'm not satisfied with the service?
               </h4>
               <p className={styles.faqAnswer}>
-                Da, poți anula o programare din dashboard-ul tău. Te rugăm să
-                anulezi cu cel puțin 24 de ore înainte pentru a respecta timpul
-                profesionistului.
-              </p>
-            </div>
-            <div className={styles.faqItem}>
-              <h4 className={styles.faqQuestion}>
-                Ce fac dacă nu sunt mulțumit de serviciu?
-              </h4>
-              <p className={styles.faqAnswer}>
-                Comunicarea e cheia! Discută mai întâi cu profesionistul.
-                Recenzia ta sinceră ajută comunitatea și motivează calitatea
-                serviciilor.
+                Communication is key! Discuss with the professional first. Your
+                honest review helps the community and motivates service quality.
               </p>
             </div>
           </div>
@@ -169,9 +165,9 @@ export function HowItWorksPage() {
       <section className={styles.ctaSection}>
         <div className={styles.container}>
           <div className={styles.ctaContent}>
-            <h2 className={styles.ctaTitle}>Gata să începi?</h2>
+            <h2 className={styles.ctaTitle}>Ready to start?</h2>
             <p className={styles.ctaSubtitle}>
-              Găsește profesionistul potrivit pentru tine în câteva secunde.
+              Find the right professional for you in seconds.
             </p>
             <div className={styles.ctaButtons}>
               <Button
@@ -179,14 +175,14 @@ export function HowItWorksPage() {
                 size="lg"
                 onClick={() => navigate("/search")}
               >
-                Caută servicii
+                Search services
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => navigate("/become-provider")}
               >
-                Devino profesionist
+                Become a professional
               </Button>
             </div>
           </div>

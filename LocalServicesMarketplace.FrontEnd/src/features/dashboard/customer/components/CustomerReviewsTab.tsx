@@ -31,7 +31,7 @@ export function CustomerReviewsTab() {
       setReviews(data);
     } catch (error) {
       console.error("Error fetching reviews:", error);
-      toast.error("Nu s-au putut încărca recenziile");
+      toast.error("Failed to load reviews");
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export function CustomerReviewsTab() {
     return (
       <div className={styles.loadingState}>
         <Loader2 className={styles.spinner} size={32} />
-        <p>Se încarcă recenziile...</p>
+        <p>Loading reviews...</p>
       </div>
     );
   }
@@ -74,12 +74,12 @@ export function CustomerReviewsTab() {
     return (
       <div className={styles.emptyState}>
         <Star size={48} />
-        <h3>Nu ai scris recenzii</h3>
+        <h3>No reviews written</h3>
         <p>
-          După ce finalizezi o programare, poți lăsa o recenzie pentru a ajuta
-          alți clienți să găsească prestatori de încredere.
+          After completing a booking, you can leave a review to help other
+          clients find trusted providers.
         </p>
-        <Button onClick={() => navigate("/search")}>Caută prestatori</Button>
+        <Button onClick={() => navigate("/search")}>Search providers</Button>
       </div>
     );
   }
@@ -87,8 +87,8 @@ export function CustomerReviewsTab() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Recenziile tale</h2>
-        <span className={styles.count}>{reviews.length} recenzii</span>
+        <h2 className={styles.title}>Your Reviews</h2>
+        <span className={styles.count}>{reviews.length} reviews</span>
       </div>
 
       <div className={styles.reviewsList}>
@@ -124,7 +124,7 @@ export function CustomerReviewsTab() {
               <div className={styles.providerResponse}>
                 <div className={styles.responseHeader}>
                   <MessageSquare size={16} />
-                  <span>Răspunsul prestatorului</span>
+                  <span>Provider Response</span>
                 </div>
                 <p className={styles.responseText}>{review.providerResponse}</p>
               </div>
@@ -136,7 +136,7 @@ export function CustomerReviewsTab() {
                 onClick={() => navigate(`/providers/${review.providerId}`)}
               >
                 <ExternalLink size={14} />
-                Vezi profilul prestatorului
+                View provider profile
               </button>
             </div>
           </div>
