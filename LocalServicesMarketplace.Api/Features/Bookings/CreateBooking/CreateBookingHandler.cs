@@ -1,4 +1,5 @@
-﻿using LocalServicesMarketplace.Api.Services.Interfaces;
+﻿using LocalServicesMarketplace.Api.Services.Implementations;
+using LocalServicesMarketplace.Api.Services.Interfaces;
 using LocalServicesMarketplace.Core.Common;
 using LocalServicesMarketplace.Core.Entities;
 using LocalServicesMarketplace.Infrastructure.Persistence;
@@ -9,7 +10,8 @@ namespace LocalServicesMarketplace.Api.Features.Bookings.CreateBooking;
 
 public class CreateBookingHandler(
     ApplicationDbContext context,
-    ICurrentUserService currentUser)
+    ICurrentUserService currentUser,
+    INotificationService notificationService)
     : IRequestHandler<CreateBookingCommand, Result<CreateBookingResponse>>
 {
     public async Task<Result<CreateBookingResponse>> Handle(
@@ -80,6 +82,7 @@ public class CreateBookingHandler(
 
         context.Set<Booking>().Add(booking);
         await context.SaveChangesAsync(cancellationToken);
+        await notificationService.SendBookingNotificationAsync(booking, NotificationType.BookingCreated);
 
         return Result<CreateBookingResponse>.Success(new CreateBookingResponse
         {

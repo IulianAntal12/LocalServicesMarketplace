@@ -9,7 +9,8 @@ namespace LocalServicesMarketplace.Api.Features.Bookings.CancelBooking;
 
 public class CancelBookingHandler(
     ApplicationDbContext context,
-    ICurrentUserService currentUser)
+    ICurrentUserService currentUser,
+    INotificationService notificationService)
     : IRequestHandler<CancelBookingCommand, Result<CancelBookingResponse>>
 {
     public async Task<Result<CancelBookingResponse>> Handle(
@@ -57,6 +58,7 @@ public class CancelBookingHandler(
         booking.UpdatedAt = DateTime.UtcNow;
 
         await context.SaveChangesAsync(cancellationToken);
+        await notificationService.SendBookingNotificationAsync(booking, NotificationType.BookingCancelled);
 
         return Result<CancelBookingResponse>.Success(new CancelBookingResponse
         {

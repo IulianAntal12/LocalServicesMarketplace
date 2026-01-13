@@ -44,4 +44,5 @@ public class ApplicationUser : IdentityUser
 
     public List<Booking> BookingsAsCustomer { get; set; } = [];
     public List<Booking> BookingsAsProvider { get; set; } = [];
+    public List<Notification> Notifications { get; set; } = [];
 }

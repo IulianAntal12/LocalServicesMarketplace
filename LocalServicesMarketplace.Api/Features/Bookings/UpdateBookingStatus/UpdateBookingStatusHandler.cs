@@ -9,7 +9,8 @@ namespace LocalServicesMarketplace.Api.Features.Bookings.UpdateBookingStatus;
 
 public class UpdateBookingStatusHandler(
     ApplicationDbContext context,
-    ICurrentUserService currentUser)
+    ICurrentUserService currentUser,
+    INotificationService notificationService)
     : IRequestHandler<UpdateBookingStatusCommand, Result<UpdateBookingStatusResponse>>
 {
     public async Task<Result<UpdateBookingStatusResponse>> Handle(
@@ -49,18 +50,25 @@ public class UpdateBookingStatusHandler(
         {
             case BookingStatus.Confirmed:
                 booking.ConfirmedAt = DateTime.UtcNow;
+                await notificationService.SendBookingNotificationAsync(booking, NotificationType.BookingConfirmed);
                 break;
             case BookingStatus.Completed:
                 booking.CompletedAt = DateTime.UtcNow;
                 if (request.FinalPrice.HasValue)
                     booking.FinalPrice = request.FinalPrice.Value;
+                await notificationService.SendBookingNotificationAsync(booking, NotificationType.BookingCompleted);
                 break;
             case BookingStatus.Rejected:
                 booking.CancelledAt = DateTime.UtcNow;
                 booking.CancelledBy = providerId;
+                await notificationService.SendBookingNotificationAsync(booking, NotificationType.BookingRejected);
                 break;
             case BookingStatus.NoShow:
                 booking.CancelledAt = DateTime.UtcNow;
+                await notificationService.SendBookingNotificationAsync(booking, NotificationType.BookingCancelled);
+                break;
+            case BookingStatus.InProgress:
+                await notificationService.SendBookingNotificationAsync(booking, NotificationType.BookingStarted);
                 break;
         }
 
