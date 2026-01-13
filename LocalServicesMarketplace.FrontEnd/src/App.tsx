@@ -9,6 +9,7 @@ import { LoginPage, RegisterPage } from "./features/auth";
 import { ProviderDashboard, CustomerDashboard } from "./features/dashboard";
 import { ProviderProfilePage } from "./features/providers";
 import { SearchPage } from "./features/search";
+import { HowItWorksPage, BecomeProviderPage } from "./features/static";
 import "./styles/globals.css";
 
 // Create a client for React Query
@@ -100,7 +101,7 @@ function App() {
               path="/how-it-works"
               element={
                 <Layout>
-                  <PlaceholderPage title="How It Works" />
+                  <HowItWorksPage />
                 </Layout>
               }
             />
@@ -109,7 +110,7 @@ function App() {
               path="/become-provider"
               element={
                 <Layout>
-                  <PlaceholderPage title="Become a Provider" />
+                  <BecomeProviderPage />
                 </Layout>
               }
             />
@@ -162,36 +163,6 @@ function App() {
         </Router>
       </AuthProvider>
     </QueryClientProvider>
-  );
-}
-
-// Placeholder component for routes not yet implemented
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div
-      style={{
-        padding: "80px 24px",
-        textAlign: "center",
-        minHeight: "60vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "2rem",
-          marginBottom: "16px",
-          color: "var(--color-text)",
-        }}
-      >
-        {title}
-      </h1>
-      <p style={{ color: "var(--color-text-muted)" }}>
-        This page is coming soon. Check back later!
-      </p>
-    </div>
   );
 }
 
