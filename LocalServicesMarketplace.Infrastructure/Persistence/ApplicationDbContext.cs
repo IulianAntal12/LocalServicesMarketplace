@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<ModerationLog> ModerationLogs { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -74,17 +75,45 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(s => s.ProviderId);
             entity.HasIndex(s => s.Category);
             entity.HasIndex(s => s.IsActive);
+            entity.HasIndex(s => s.ModerationStatus);
 
             entity.Property(s => s.Name).HasMaxLength(100).IsRequired();
             entity.Property(s => s.Description).HasMaxLength(500).IsRequired();
             entity.Property(s => s.Category).HasMaxLength(50).IsRequired();
             entity.Property(s => s.PriceType).HasMaxLength(20).IsRequired();
             entity.Property(s => s.BasePrice).HasPrecision(10, 2);
+            entity.Property(s => s.ModerationReason).HasMaxLength(500);
+            entity.Property(s => s.ModerationStatus)
+                .HasConversion<string>()
+                .HasMaxLength(20);
 
             entity.HasOne(s => s.Provider)
                 .WithMany(u => u.Services)
                 .HasForeignKey(s => s.ProviderId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ModerationLog configuration
+        builder.Entity<ModerationLog>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+
+            entity.Property(m => m.OldStatus).HasMaxLength(20).IsRequired();
+            entity.Property(m => m.NewStatus).HasMaxLength(20).IsRequired();
+            entity.Property(m => m.Reason).HasMaxLength(500);
+
+            entity.HasOne(m => m.Service)
+                .WithMany()
+                .HasForeignKey(m => m.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(m => m.Moderator)
+                .WithMany()
+                .HasForeignKey(m => m.ModeratedBy)
+                .OnDelete(DeleteBehavior.NoAction); 
+
+            entity.HasIndex(m => m.ServiceId);
+            entity.HasIndex(m => m.CreatedAt);
         });
 
         // Configure ServiceCategory

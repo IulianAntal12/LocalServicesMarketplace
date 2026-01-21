@@ -14,6 +14,13 @@ public class Service
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
+    // Moderation fields
+    public ModerationStatus ModerationStatus { get; set; } = ModerationStatus.Pending;
+    public string? ModerationReason { get; set; }
+    public DateTime? ModeratedAt { get; set; }
+    public string? ModeratedBy { get; set; } // null = AI, otherwise Admin UserId
+
     // Navigation
     public ApplicationUser Provider { get; set; } = null!;
+    public ICollection<ModerationLog> ModerationLogs { get; set; } = [];
 }

@@ -1,0 +1,298 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Loading & Empty States */
+.loadingState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.emptyState h3 {
+  margin: 1rem 0 0.5rem;
+  color: var(--color-text);
+}
+
+.emptyState p {
+  margin: 0;
+  max-width: 400px;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--color-surface);
+  padding: 0.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.filterTab {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterTab:hover {
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+.filterTab.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.count {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* Services List */
+.servicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Service Card */
+.serviceCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  transition: box-shadow 0.2s ease;
+}
+
+.serviceCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.serviceMain {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.serviceIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #EF4444;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.serviceInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.serviceHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.serviceName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusBadge.aiRejected {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.statusBadge.adminRejected {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.serviceDescription {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+/* Reason Box */
+.reasonBox {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: #FEF3C7;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  color: #92400E;
+}
+
+.reasonBox > svg {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.reasonBox strong {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 0.25rem;
+}
+
+.reasonBox p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.reasonBox.adminReason {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.serviceMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.metaItem {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.metaItem strong {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.serviceDate {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Actions */
+.serviceActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.serviceActions button {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  white-space: nowrap;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.pageInfo {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterTabs {
+    overflow-x: auto;
+  }
+
+  .serviceCard {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .serviceActions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .serviceMeta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

@@ -1,111 +1,92 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Wrench, Menu, X, Bell } from "lucide-react";
-import { Button } from "../common";
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Menu, X, Search, Shield } from "lucide-react";
 import { useAuth } from "../../context";
-import { notificationService } from "../../services/notificationService";
+import { Button } from "../common";
 import styles from "./Navbar.module.css";
 
 export function Navbar() {
-  const { isAuthenticated, user, logout, isProvider, isCustomer } = useAuth();
+  const { isAuthenticated, user, logout, isProvider, isCustomer, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  // Fetch unread notifications count
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      if (!isAuthenticated) return;
-      try {
-        const summary = await notificationService.getSummary();
-        setUnreadCount(summary.unreadCount);
-      } catch (error) {
-        console.error("Error fetching notification count:", error);
-      }
-    };
-
-    fetchUnreadCount();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/");
+    setIsMobileMenuOpen(false);
   };
 
-  // Dynamic dashboard link based on user role
   const getDashboardLink = () => {
+    if (isAdmin) return "/dashboard/admin";
     if (isProvider) return "/dashboard/provider";
     if (isCustomer) return "/dashboard/customer";
     return "/dashboard";
   };
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
         {/* Logo */}
         <Link to="/" className={styles.logo}>
-          <div className={styles.logoIcon}>
-            <Wrench size={22} color="white" />
-          </div>
           <span className={styles.logoText}>LocalPro</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className={styles.navLinks}>
-          <Link to="/search" className={styles.navLink}>
-            Browse Services
+        <div className={styles.desktopNav}>
+          <Link
+            to="/search"
+            className={`${styles.navLink} ${isActive("/search") ? styles.active : ""}`}
+          >
+            <Search size={18} />
+            Find Services
           </Link>
-          <Link to="/how-it-works" className={styles.navLink}>
+          <Link
+            to="/how-it-works"
+            className={`${styles.navLink} ${isActive("/how-it-works") ? styles.active : ""}`}
+          >
             How It Works
           </Link>
-          <Link to="/become-provider" className={styles.navLink}>
-            For Providers
-          </Link>
+          {!isProvider && (
+            <Link
+              to="/become-provider"
+              className={`${styles.navLink} ${isActive("/become-provider") ? styles.active : ""}`}
+            >
+              Become a Provider
+            </Link>
+          )}
         </div>
 
-        {/* Auth Buttons */}
-        <div className={styles.authButtons}>
+        {/* Desktop Auth */}
+        <div className={styles.desktopAuth}>
           {isAuthenticated ? (
             <>
-              <Link
-                to={`${getDashboardLink()}?tab=notifications`}
-                className={styles.notificationLink}
-                title="Notificări"
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className={styles.notificationBadge}>
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </span>
-                )}
-              </Link>
-              <Link to={getDashboardLink()} className={styles.navLink}>
+              {isAdmin && (
+                <Link to="/dashboard/admin" className={styles.adminBadge}>
+                  <Shield size={16} />
+                  Admin
+                </Link>
+              )}
+              <Link to={getDashboardLink()} className={styles.dashboardLink}>
                 Dashboard
               </Link>
-              <span className={styles.userName}>
-                Hi, {user?.fullName?.split(" ")[0]}
-              </span>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                Log Out
-              </Button>
+              <div className={styles.userMenu}>
+                <span className={styles.userName}>
+                  {user?.fullName?.split(" ")[0] || "User"}
+                </span>
+                <button className={styles.logoutButton} onClick={handleLogout}>
+                  Log Out
+                </button>
+              </div>
             </>
           ) : (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/login")}
-              >
+              <Button variant="outline" onClick={() => navigate("/login")}>
                 Log In
               </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => navigate("/register")}
-              >
+              <Button variant="primary" onClick={() => navigate("/register")}>
                 Sign Up
               </Button>
             </>
@@ -114,8 +95,9 @@ export function Navbar() {
 
         {/* Mobile Menu Toggle */}
         <button
-          className={styles.mobileMenuToggle}
+          className={styles.mobileMenuButton}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -129,7 +111,7 @@ export function Navbar() {
             className={styles.mobileNavLink}
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            Browse Services
+            Find Services
           </Link>
           <Link
             to="/how-it-works"
@@ -138,16 +120,30 @@ export function Navbar() {
           >
             How It Works
           </Link>
-          <Link
-            to="/become-provider"
-            className={styles.mobileNavLink}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            For Providers
-          </Link>
+          {!isProvider && (
+            <Link
+              to="/become-provider"
+              className={styles.mobileNavLink}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Become a Provider
+            </Link>
+          )}
+
+          <div className={styles.mobileDivider} />
 
           {isAuthenticated ? (
             <>
+              {isAdmin && (
+                <Link
+                  to="/dashboard/admin"
+                  className={`${styles.mobileNavLink} ${styles.adminLink}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Shield size={18} />
+                  Admin Dashboard
+                </Link>
+              )}
               <Link
                 to={getDashboardLink()}
                 className={styles.mobileNavLink}

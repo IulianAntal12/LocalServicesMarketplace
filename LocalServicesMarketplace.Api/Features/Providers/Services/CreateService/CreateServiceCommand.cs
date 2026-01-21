@@ -17,4 +17,6 @@ public class CreateServiceResponse
 {
     public int ServiceId { get; set; }
     public required string Message { get; set; }
+    public string? ModerationStatus { get; set; }
+    public string? ModerationReason { get; set; }
 }
