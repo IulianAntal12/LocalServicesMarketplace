@@ -30,7 +30,8 @@ export function RejectedServicesTab() {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("AiRejected");
-  const [selectedService, setSelectedService] = useState<ServiceModerationDto | null>(null);
+  const [selectedService, setSelectedService] =
+    useState<ServiceModerationDto | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchServices = useCallback(async () => {
@@ -99,7 +100,11 @@ export function RejectedServicesTab() {
     });
   };
 
-  const formatPrice = (price: number, priceType: string): string => {
+  const formatPrice = (
+    price: number | undefined,
+    priceType: string,
+  ): string => {
+    if (price === undefined || price === null) return "N/A";
     if (priceType === "Quote") return "Request Quote";
     const suffix = priceType === "Hourly" ? "/hr" : "";
     return `$${price.toFixed(2)}${suffix}`;
@@ -168,8 +173,8 @@ export function RejectedServicesTab() {
             {filterStatus === "AiRejected"
               ? "No services have been rejected by AI. The AI is doing a good job!"
               : filterStatus === "AdminRejected"
-              ? "No services have been rejected by administrators."
-              : "No rejected services found."}
+                ? "No services have been rejected by administrators."
+                : "No rejected services found."}
           </p>
         </div>
       ) : (
@@ -204,25 +209,30 @@ export function RejectedServicesTab() {
                     )}
 
                     {/* Admin Reason (if admin rejected) */}
-                    {service.adminReason && service.moderationStatus === "AdminRejected" && (
-                      <div className={`${styles.reasonBox} ${styles.adminReason}`}>
-                        <X size={14} />
-                        <div>
-                          <strong>Admin Reason:</strong>
-                          <p>{service.adminReason}</p>
+                    {service.adminReason &&
+                      service.moderationStatus === "AdminRejected" && (
+                        <div
+                          className={`${styles.reasonBox} ${styles.adminReason}`}
+                        >
+                          <X size={14} />
+                          <div>
+                            <strong>Admin Reason:</strong>
+                            <p>{service.adminReason}</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     <div className={styles.serviceMeta}>
                       <span className={styles.metaItem}>
-                        <strong>Category:</strong> {service.categoryName}
+                        <strong>Category:</strong> {service.category}
                       </span>
                       <span className={styles.metaItem}>
-                        <strong>Price:</strong> {formatPrice(service.price, service.priceType)}
+                        <strong>Price:</strong>{" "}
+                        {formatPrice(service.basePrice, service.priceType)}
                       </span>
                       <span className={styles.metaItem}>
-                        <strong>Provider:</strong> {service.providerBusinessName || service.providerName}
+                        <strong>Provider:</strong>{" "}
+                        {service.providerBusinessName || service.providerName}
                       </span>
                     </div>
                     <span className={styles.serviceDate}>
@@ -234,7 +244,7 @@ export function RejectedServicesTab() {
                 <div className={styles.serviceActions}>
                   <Button
                     variant="outline"
-                    size="small"
+                    size="sm"
                     onClick={() => handleViewService(service)}
                   >
                     <Eye size={16} />
@@ -243,7 +253,7 @@ export function RejectedServicesTab() {
                   {service.moderationStatus === "AiRejected" && (
                     <Button
                       variant="primary"
-                      size="small"
+                      size="sm"
                       onClick={() => handleQuickApprove(service)}
                     >
                       <Check size={16} />
@@ -260,7 +270,7 @@ export function RejectedServicesTab() {
             <div className={styles.pagination}>
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
@@ -272,8 +282,10 @@ export function RejectedServicesTab() {
               </span>
               <Button
                 variant="outline"
-                size="small"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                size="sm"
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 Next

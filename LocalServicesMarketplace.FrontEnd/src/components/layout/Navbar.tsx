@@ -6,7 +6,8 @@ import { Button } from "../common";
 import styles from "./Navbar.module.css";
 
 export function Navbar() {
-  const { isAuthenticated, user, logout, isProvider, isCustomer, isAdmin } = useAuth();
+  const { isAuthenticated, user, logout, isProvider, isCustomer, isAdmin } =
+    useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

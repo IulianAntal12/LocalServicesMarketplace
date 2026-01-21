@@ -103,7 +103,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(m => m.Reason).HasMaxLength(500);
 
             entity.HasOne(m => m.Service)
-                .WithMany()
+                .WithMany(s => s.ModerationLogs)
                 .HasForeignKey(m => m.ServiceId)
                 .OnDelete(DeleteBehavior.Cascade);
 

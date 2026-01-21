@@ -1,15 +1,5 @@
 import { useState } from "react";
-import {
-  Check,
-  X,
-  Briefcase,
-  User,
-  Tag,
-  DollarSign,
-  AlertTriangle,
-  Bot,
-  Loader2,
-} from "lucide-react";
+import { Check, X, Briefcase, User, Tag, DollarSign, Bot } from "lucide-react";
 import { Modal } from "../../../../components/common/Modal";
 import { Button } from "../../../../components/common/Button";
 import {
@@ -57,7 +47,7 @@ export function ModerationModal({
       toast.success(
         action === "approve"
           ? `"${service.name}" has been approved`
-          : `"${service.name}" has been rejected`
+          : `"${service.name}" has been rejected`,
       );
       onComplete();
     } catch (err) {
@@ -86,7 +76,12 @@ export function ModerationModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Review Service" size="large">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Review Service"
+      size="large"
+    >
       <div className={styles.container}>
         {/* Service Details */}
         <div className={styles.serviceDetails}>
@@ -96,7 +91,7 @@ export function ModerationModal({
             </div>
             <div>
               <h2 className={styles.serviceName}>{service.name}</h2>
-              <span className={styles.serviceCategory}>{service.categoryName}</span>
+              <span className={styles.serviceCategory}>{service.category}</span>
             </div>
           </div>
 
@@ -115,7 +110,7 @@ export function ModerationModal({
               <div>
                 <span className={styles.detailLabel}>Price</span>
                 <span className={styles.detailValue}>
-                  {formatPrice(service.price, service.priceType)}
+                  {formatPrice(service.basePrice, service.priceType)}
                 </span>
               </div>
             </div>
@@ -209,8 +204,8 @@ export function ModerationModal({
             {action === "approve"
               ? "Approve Service"
               : action === "reject"
-              ? "Reject Service"
-              : "Select Action"}
+                ? "Reject Service"
+                : "Select Action"}
           </Button>
         </div>
       </div>

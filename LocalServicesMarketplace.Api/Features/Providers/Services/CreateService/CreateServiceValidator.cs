@@ -22,7 +22,7 @@ public class CreateServiceValidator : AbstractValidator<CreateServiceCommand>
 
         RuleFor(x => x.BasePrice)
             .GreaterThanOrEqualTo(0).WithMessage("Price must be positive!")
-            .LessThan(10000).WithMessage("Price seems too high!");
+            .LessThan(100000).WithMessage("Price seems too high!");
 
         RuleFor(x => x.PriceType)
             .Must(x => _validPriceTypes.Contains(x))

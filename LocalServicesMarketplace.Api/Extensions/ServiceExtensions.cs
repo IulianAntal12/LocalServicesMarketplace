@@ -175,7 +175,7 @@ public static class ServiceExtensions
         services.AddScoped<INotificationService, NotificationService>();
 
         // Gemini AI Service
-        services.AddHttpClient<IGeminiService, GeminiService>();
+        services.AddScoped<IGeminiService, GeminiService>();
 
         return services;
     }

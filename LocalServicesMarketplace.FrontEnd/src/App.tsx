@@ -6,7 +6,11 @@ import { Layout } from "./components/layout";
 import { ProtectedRoute, RedirectIfAuthenticated } from "./components/common";
 import { HomePage } from "./features/home";
 import { LoginPage, RegisterPage } from "./features/auth";
-import { ProviderDashboard, CustomerDashboard, AdminDashboard } from "./features/dashboard";
+import {
+  ProviderDashboard,
+  CustomerDashboard,
+  AdminDashboard,
+} from "./features/dashboard";
 import { ProviderProfilePage } from "./features/providers";
 import { SearchPage } from "./features/search";
 import { HowItWorksPage, BecomeProviderPage } from "./features/static";

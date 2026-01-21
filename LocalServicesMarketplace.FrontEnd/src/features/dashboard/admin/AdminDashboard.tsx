@@ -33,7 +33,7 @@ export function AdminDashboard() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabId>(() =>
-    getInitialTab(searchParams)
+    getInitialTab(searchParams),
   );
 
   const renderContent = () => {

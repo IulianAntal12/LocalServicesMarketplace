@@ -49,8 +49,7 @@ namespace LocalServicesMarketplace.Infrastructure.Migrations
                     NewStatus = table.Column<int>(type: "int", maxLength: 20, nullable: false),
                     Reason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     ModeratedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ServiceId1 = table.Column<int>(type: "int", nullable: true)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,11 +60,6 @@ namespace LocalServicesMarketplace.Infrastructure.Migrations
                         principalTable: "Services",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ModerationLogs_Services_ServiceId1",
-                        column: x => x.ServiceId1,
-                        principalTable: "Services",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ModerationLogs_Users_ModeratedBy",
                         column: x => x.ModeratedBy,
@@ -92,11 +86,6 @@ namespace LocalServicesMarketplace.Infrastructure.Migrations
                 name: "IX_ModerationLogs_ServiceId",
                 table: "ModerationLogs",
                 column: "ServiceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ModerationLogs_ServiceId1",
-                table: "ModerationLogs",
-                column: "ServiceId1");
         }
 
         /// <inheritdoc />

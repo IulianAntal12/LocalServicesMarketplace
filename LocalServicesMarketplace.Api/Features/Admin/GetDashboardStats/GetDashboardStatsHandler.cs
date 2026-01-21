@@ -15,13 +15,15 @@ public class GetDashboardStatsHandler(
 {
     public async Task<Result<DashboardStatsDto>> Handle(GetDashboardStatsQuery request, CancellationToken ct)
     {
+        // Total services (all, regardless of moderation status)
+        var totalServices = await context.Services.CountAsync(ct);
+
         // Service stats by moderation status
         var serviceStats = await context.Services
             .GroupBy(s => s.ModerationStatus)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync(ct);
 
-        var totalServices = serviceStats.Sum(s => s.Count);
         var pendingServices = serviceStats.FirstOrDefault(s => s.Status == ModerationStatus.Pending)?.Count ?? 0;
         var aiRejectedServices = serviceStats.FirstOrDefault(s => s.Status == ModerationStatus.AiRejected)?.Count ?? 0;
         var approvedServices = serviceStats.FirstOrDefault(s => s.Status == ModerationStatus.Approved)?.Count ?? 0;
@@ -30,10 +32,18 @@ public class GetDashboardStatsHandler(
         // User counts
         var providers = await userManager.GetUsersInRoleAsync(Roles.Provider);
         var customers = await userManager.GetUsersInRoleAsync(Roles.Customer);
+        var totalUsers = providers.Count + customers.Count;
 
-        // Other stats
+        // Booking stats
         var totalBookings = await context.Bookings.CountAsync(ct);
+        var completedBookings = await context.Bookings
+            .CountAsync(b => b.Status == BookingStatus.Completed, ct);
+
+        // Review stats
         var totalReviews = await context.Reviews.CountAsync(ct);
+        var averageRating = totalReviews > 0
+            ? await context.Reviews.AverageAsync(r => r.Rating, ct)
+            : 0;
 
         // Recent moderation logs
         var recentModerations = await context.ModerationLogs
@@ -57,6 +67,7 @@ public class GetDashboardStatsHandler(
 
         return Result<DashboardStatsDto>.Success(new DashboardStatsDto
         {
+            TotalUsers = totalUsers,
             TotalServices = totalServices,
             PendingServices = pendingServices,
             AiRejectedServices = aiRejectedServices,
@@ -65,7 +76,9 @@ public class GetDashboardStatsHandler(
             TotalProviders = providers.Count,
             TotalCustomers = customers.Count,
             TotalBookings = totalBookings,
+            CompletedBookings = completedBookings,
             TotalReviews = totalReviews,
+            AverageRating = Math.Round(averageRating, 1),
             RecentModerations = recentModerations
         });
     }

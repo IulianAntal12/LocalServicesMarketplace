@@ -71,9 +71,10 @@ public class AdminEndpoints : IEndpoint
     private static async Task<IResult> GetRejectedServicesAsync(
         [FromQuery] int page,
         [FromQuery] int pageSize,
-        [FromQuery] bool onlyAiRejected,
         IMediator mediator,
-        CancellationToken ct)
+        CancellationToken ct,
+        [FromQuery] bool onlyAiRejected = true
+    )
     {
         var query = new GetRejectedServicesQuery
         {

@@ -13,9 +13,9 @@ export interface ServiceModerationDto {
   id: number;
   name: string;
   description: string;
-  price: number;
+  basePrice: number;
   priceType: string;
-  categoryName: string;
+  category: string;
   providerId: string;
   providerName: string;
   providerBusinessName?: string;
@@ -90,7 +90,7 @@ export const adminService = {
 
   // Get pending services (waiting for moderation)
   getPendingServices: async (
-    params?: GetPendingServicesParams
+    params?: GetPendingServicesParams,
   ): Promise<GetPendingServicesResponse> => {
     const queryParams = new URLSearchParams();
     queryParams.append("page", String(params?.page || 1));
@@ -100,14 +100,14 @@ export const adminService = {
     }
 
     const response = await api.get<GetPendingServicesResponse>(
-      `/admin/services/pending?${queryParams.toString()}`
+      `/admin/services/pending?${queryParams.toString()}`,
     );
     return response.data;
   },
 
   // Get AI rejected services
   getRejectedServices: async (
-    params?: GetRejectedServicesParams
+    params?: GetRejectedServicesParams,
   ): Promise<GetRejectedServicesResponse> => {
     const queryParams = new URLSearchParams();
     queryParams.append("page", String(params?.page || 1));
@@ -120,7 +120,7 @@ export const adminService = {
     }
 
     const response = await api.get<GetRejectedServicesResponse>(
-      `/admin/services/rejected?${queryParams.toString()}`
+      `/admin/services/rejected?${queryParams.toString()}`,
     );
     return response.data;
   },
@@ -128,19 +128,21 @@ export const adminService = {
   // Moderate a service (approve or reject)
   moderateService: async (
     serviceId: number,
-    request: ModerateServiceRequest
+    request: ModerateServiceRequest,
   ): Promise<ModerateServiceResponse> => {
     const response = await api.post<ModerateServiceResponse>(
       `/admin/services/${serviceId}/moderate`,
-      request
+      request,
     );
     return response.data;
   },
 
   // Get service details for moderation
-  getServiceDetails: async (serviceId: number): Promise<ServiceModerationDto> => {
+  getServiceDetails: async (
+    serviceId: number,
+  ): Promise<ServiceModerationDto> => {
     const response = await api.get<ServiceModerationDto>(
-      `/admin/services/${serviceId}`
+      `/admin/services/${serviceId}`,
     );
     return response.data;
   },

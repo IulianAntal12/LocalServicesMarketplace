@@ -3,7 +3,6 @@ export { authService } from "./authService";
 export { providerService } from "./providerService";
 export { categoryService } from "./categoryService";
 export { portfolioService } from "./portfolioService";
-export { searchService } from "./searchService";
 export { reviewService } from "./reviewService";
 export { bookingService } from "./bookingService";
 export { notificationService } from "./notificationService";

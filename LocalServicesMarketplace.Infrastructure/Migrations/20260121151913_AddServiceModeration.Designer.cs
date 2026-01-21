@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalServicesMarketplace.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260121145610_AddServiceModeration")]
+    [Migration("20260121151913_AddServiceModeration")]
     partial class AddServiceModeration
     {
         /// <inheritdoc />
@@ -321,9 +321,6 @@ namespace LocalServicesMarketplace.Infrastructure.Migrations
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ServiceId1")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedAt");
@@ -331,8 +328,6 @@ namespace LocalServicesMarketplace.Infrastructure.Migrations
                     b.HasIndex("ModeratedBy");
 
                     b.HasIndex("ServiceId");
-
-                    b.HasIndex("ServiceId1");
 
                     b.ToTable("ModerationLogs");
                 });
@@ -842,14 +837,10 @@ namespace LocalServicesMarketplace.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("LocalServicesMarketplace.Core.Entities.Service", "Service")
-                        .WithMany()
+                        .WithMany("ModerationLogs")
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("LocalServicesMarketplace.Core.Entities.Service", null)
-                        .WithMany("ModerationLogs")
-                        .HasForeignKey("ServiceId1");
 
                     b.Navigation("Moderator");
 

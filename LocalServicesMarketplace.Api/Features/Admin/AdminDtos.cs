@@ -37,6 +37,7 @@ public class ModerateServiceResponse
 
 public class DashboardStatsDto
 {
+    public int TotalUsers { get; set; }
     public int TotalServices { get; set; }
     public int PendingServices { get; set; }
     public int AiRejectedServices { get; set; }
@@ -45,7 +46,9 @@ public class DashboardStatsDto
     public int TotalProviders { get; set; }
     public int TotalCustomers { get; set; }
     public int TotalBookings { get; set; }
+    public int CompletedBookings { get; set; }
     public int TotalReviews { get; set; }
+    public double AverageRating { get; set; }
     public List<RecentModerationDto> RecentModerations { get; set; } = [];
 }
 
