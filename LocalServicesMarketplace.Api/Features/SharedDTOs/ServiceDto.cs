@@ -10,4 +10,6 @@ public class ServiceDto
     public string PriceType { get; set; } = "Hourly";
     public int EstimatedDurationMinutes { get; set; }
     public bool IsActive { get; set; }
+    public string? ModerationStatus { get; set; }
+    public string? ModerationReason { get; set; }
 }

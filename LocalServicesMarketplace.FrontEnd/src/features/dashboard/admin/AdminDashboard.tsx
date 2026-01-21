@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BarChart3, Clock, XCircle, Shield } from "lucide-react";
+import { BarChart3, XCircle, Shield } from "lucide-react";
 import { useAuth } from "../../../context";
 import { StatsTab } from "./components/StatsTab";
-import { PendingServicesTab } from "./components/PendingServicesTab";
 import { RejectedServicesTab } from "./components/RejectedServicesTab";
 import styles from "./AdminDashboard.module.css";
 
-type TabId = "stats" | "pending" | "rejected";
+type TabId = "stats" | "rejected";
 
 interface Tab {
   id: TabId;
@@ -17,8 +16,7 @@ interface Tab {
 
 const tabs: Tab[] = [
   { id: "stats", label: "Overview", icon: BarChart3 },
-  { id: "pending", label: "Pending Review", icon: Clock },
-  { id: "rejected", label: "AI Rejected", icon: XCircle },
+  { id: "rejected", label: "Moderation Queue", icon: XCircle },
 ];
 
 const getInitialTab = (searchParams: URLSearchParams): TabId => {
@@ -40,8 +38,6 @@ export function AdminDashboard() {
     switch (activeTab) {
       case "stats":
         return <StatsTab />;
-      case "pending":
-        return <PendingServicesTab />;
       case "rejected":
         return <RejectedServicesTab />;
       default:

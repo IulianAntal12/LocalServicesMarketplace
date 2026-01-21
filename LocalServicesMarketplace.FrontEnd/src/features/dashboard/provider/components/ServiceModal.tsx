@@ -43,7 +43,7 @@ export function ServiceModal({
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] =
     useState<CreateServiceRequest>(initialFormData);
-  const [isActive, setIsActive] = useState(true);
+  const [, setIsActive] = useState(true);
 
   const isEditing = !!service;
 
@@ -86,7 +86,7 @@ export function ServiceModal({
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -119,22 +119,41 @@ export function ServiceModal({
       setLoading(true);
 
       if (isEditing && service) {
-        await providerService.updateService(service.id, {
+        // UPDATE
+        const response = await providerService.updateService(service.id, {
           name: formData.name,
           description: formData.description,
           basePrice: formData.basePrice,
-          isActive: isActive,
+          priceType: formData.priceType,
+          estimatedDurationMinutes: formData.estimatedDurationMinutes,
         });
-        toast.success("Service updated successfully!");
+
+        if (response.moderationStatus === "AiRejected") {
+          toast.error(
+            "Service updated but flagged for review: " +
+              response.moderationReason,
+          );
+        } else {
+          toast.success("Service updated and approved!");
+        }
       } else {
-        await providerService.createService(formData);
-        toast.success("Service created successfully!");
+        // CREATE
+        const response = await providerService.createService(formData);
+
+        if (response.moderationStatus === "AiRejected") {
+          toast.error(
+            "Service created but flagged for review: " +
+              response.moderationReason,
+          );
+        } else {
+          toast.success("Service created successfully!");
+        }
       }
 
       onSuccess();
     } catch (err) {
       toast.error(
-        isEditing ? "Failed to update service" : "Failed to create service"
+        isEditing ? "Failed to update service" : "Failed to create service",
       );
       console.error("Error saving service:", err);
     } finally {
@@ -272,21 +291,6 @@ export function ServiceModal({
             Between 1 and 480 minutes (8 hours)
           </span>
         </div>
-
-        {/* Active Status (only when editing) */}
-        {isEditing && (
-          <div className={styles.formGroup}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                className={styles.checkbox}
-              />
-              <span>Service is active and visible to customers</span>
-            </label>
-          </div>
-        )}
 
         {/* Actions */}
         <div className={styles.actions}>

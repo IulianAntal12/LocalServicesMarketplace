@@ -4,12 +4,12 @@ import {
   Loader2,
   Eye,
   Check,
-  X,
   ChevronLeft,
   ChevronRight,
   Briefcase,
   AlertTriangle,
   Bot,
+  UserX,
 } from "lucide-react";
 import { Button } from "../../../../components/common/Button";
 import {
@@ -63,17 +63,6 @@ export function RejectedServicesTab() {
     setIsModalOpen(true);
   };
 
-  const handleQuickApprove = async (service: ServiceModerationDto) => {
-    try {
-      await adminService.moderateService(service.id, { action: "approve" });
-      toast.success(`"${service.name}" approved (AI decision overridden)`);
-      fetchServices();
-    } catch (err) {
-      console.error("Error approving service:", err);
-      toast.error("Failed to approve service");
-    }
-  };
-
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedService(null);
@@ -107,7 +96,7 @@ export function RejectedServicesTab() {
     if (price === undefined || price === null) return "N/A";
     if (priceType === "Quote") return "Request Quote";
     const suffix = priceType === "Hourly" ? "/hr" : "";
-    return `$${price.toFixed(2)}${suffix}`;
+    return `${price.toFixed(2)} RON${suffix}`;
   };
 
   const getStatusBadge = (status: ModerationStatus) => {
@@ -121,7 +110,7 @@ export function RejectedServicesTab() {
     }
     return (
       <span className={`${styles.statusBadge} ${styles.adminRejected}`}>
-        <X size={12} />
+        <UserX size={12} />
         Admin Rejected
       </span>
     );
@@ -131,7 +120,7 @@ export function RejectedServicesTab() {
     return (
       <div className={styles.loadingState}>
         <Loader2 className={styles.spinner} size={32} />
-        <p>Loading rejected services...</p>
+        <p>Loading services...</p>
       </div>
     );
   }
@@ -142,21 +131,27 @@ export function RejectedServicesTab() {
       <div className={styles.filters}>
         <div className={styles.filterTabs}>
           <button
-            className={`${styles.filterTab} ${filterStatus === "AiRejected" ? styles.active : ""}`}
+            className={`${styles.filterTab} ${
+              filterStatus === "AiRejected" ? styles.active : ""
+            }`}
             onClick={() => handleFilterChange("AiRejected")}
           >
             <Bot size={16} />
             AI Rejected
           </button>
           <button
-            className={`${styles.filterTab} ${filterStatus === "AdminRejected" ? styles.active : ""}`}
+            className={`${styles.filterTab} ${
+              filterStatus === "AdminRejected" ? styles.active : ""
+            }`}
             onClick={() => handleFilterChange("AdminRejected")}
           >
-            <X size={16} />
+            <UserX size={16} />
             Admin Rejected
           </button>
           <button
-            className={`${styles.filterTab} ${filterStatus === "all" ? styles.active : ""}`}
+            className={`${styles.filterTab} ${
+              filterStatus === "all" ? styles.active : ""
+            }`}
             onClick={() => handleFilterChange("all")}
           >
             All Rejected
@@ -171,7 +166,7 @@ export function RejectedServicesTab() {
           <h3>No rejected services</h3>
           <p>
             {filterStatus === "AiRejected"
-              ? "No services have been rejected by AI. The AI is doing a good job!"
+              ? "No services have been rejected by AI."
               : filterStatus === "AdminRejected"
                 ? "No services have been rejected by administrators."
                 : "No rejected services found."}
@@ -197,27 +192,28 @@ export function RejectedServicesTab() {
                         : service.description}
                     </p>
 
-                    {/* AI Reason */}
-                    {service.aiReason && (
-                      <div className={styles.reasonBox}>
-                        <AlertTriangle size={14} />
-                        <div>
-                          <strong>AI Rejection Reason:</strong>
-                          <p>{service.aiReason}</p>
+                    {/* AI Reason - Always show for AI rejected */}
+                    {service.moderationStatus === "AiRejected" &&
+                      service.moderationReason && (
+                        <div className={styles.reasonBox}>
+                          <AlertTriangle size={14} />
+                          <div>
+                            <strong>AI Rejection Reason:</strong>
+                            <p>{service.moderationReason}</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Admin Reason (if admin rejected) */}
-                    {service.adminReason &&
-                      service.moderationStatus === "AdminRejected" && (
+                    {/* Admin Reason - Show for Admin rejected */}
+                    {service.moderationStatus === "AdminRejected" &&
+                      service.moderationReason && (
                         <div
                           className={`${styles.reasonBox} ${styles.adminReason}`}
                         >
-                          <X size={14} />
+                          <UserX size={14} />
                           <div>
-                            <strong>Admin Reason:</strong>
-                            <p>{service.adminReason}</p>
+                            <strong>Admin Rejection Reason:</strong>
+                            <p>{service.moderationReason}</p>
                           </div>
                         </div>
                       )}
@@ -254,10 +250,10 @@ export function RejectedServicesTab() {
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() => handleQuickApprove(service)}
+                      onClick={() => handleViewService(service)}
                     >
                       <Check size={16} />
-                      Override & Approve
+                      Override
                     </Button>
                   )}
                 </div>

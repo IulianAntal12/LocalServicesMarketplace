@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, DollarSign, Clock, Tag } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  DollarSign,
+  Clock,
+  Tag,
+  AlertTriangle,
+  Bot,
+  UserX,
+  CheckCircle,
+} from "lucide-react";
 import {
   type ServiceDto,
   providerService,
@@ -78,6 +89,45 @@ export function ServicesTab({ services, onUpdate }: ServicesTabProps) {
     return `${price.toFixed(2)} RON${suffix}`;
   };
 
+  const getModerationStatusInfo = (service: ServiceDto) => {
+    if (service.isActive && service.moderationStatus === "Approved") {
+      return {
+        icon: <CheckCircle size={14} />,
+        label: "Active",
+        className: styles.statusActive,
+        reason: null,
+      };
+    }
+
+    if (service.moderationStatus === "AiRejected") {
+      return {
+        icon: <Bot size={14} />,
+        label: "Pending Review",
+        className: styles.statusPending,
+        reason: service.moderationReason,
+        reasonLabel: "AI flagged this service:",
+      };
+    }
+
+    if (service.moderationStatus === "AdminRejected") {
+      return {
+        icon: <UserX size={14} />,
+        label: "Rejected",
+        className: styles.statusRejected,
+        reason: service.moderationReason,
+        reasonLabel: "Rejection reason:",
+      };
+    }
+
+    // Fallback for inactive without specific status
+    return {
+      icon: <AlertTriangle size={14} />,
+      label: "Inactive",
+      className: styles.statusInactive,
+      reason: null,
+    };
+  };
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -111,67 +161,95 @@ export function ServicesTab({ services, onUpdate }: ServicesTabProps) {
         </div>
       ) : (
         <div className={styles.servicesList}>
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className={`${styles.serviceCard} ${
-                !service.isActive ? styles.inactive : ""
-              }`}
-            >
-              <div className={styles.serviceHeader}>
-                <div className={styles.serviceInfo}>
-                  <h3 className={styles.serviceName}>{service.name}</h3>
-                  <span className={styles.serviceCategory}>
-                    {service.category}
-                  </span>
+          {services.map((service) => {
+            const statusInfo = getModerationStatusInfo(service);
+
+            return (
+              <div
+                key={service.id}
+                className={`${styles.serviceCard} ${
+                  !service.isActive ? styles.inactive : ""
+                }`}
+              >
+                <div className={styles.serviceHeader}>
+                  <div className={styles.serviceInfo}>
+                    <h3 className={styles.serviceName}>{service.name}</h3>
+                    <span className={styles.serviceCategory}>
+                      {service.category}
+                    </span>
+                  </div>
+                  <div className={styles.serviceActions}>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => handleEditClick(service)}
+                      aria-label="Edit service"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      className={`${styles.actionButton} ${styles.deleteButton}`}
+                      onClick={() => handleDeleteClick(service.id)}
+                      disabled={deletingId === service.id}
+                      aria-label="Delete service"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-                <div className={styles.serviceActions}>
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => handleEditClick(service)}
-                    aria-label="Edit service"
+
+                <p className={styles.serviceDescription}>
+                  {service.description}
+                </p>
+
+                {/* Moderation Status Alert */}
+                {!service.isActive && statusInfo.reason && (
+                  <div className={styles.moderationAlert}>
+                    {statusInfo.icon}
+                    <div className={styles.moderationContent}>
+                      <strong>{statusInfo.reasonLabel}</strong>
+                      <p>{statusInfo.reason}</p>
+                      {service.moderationStatus === "AiRejected" && (
+                        <span className={styles.moderationHint}>
+                          An admin will review your service shortly. You can
+                          edit the service to address the issues.
+                        </span>
+                      )}
+                      {service.moderationStatus === "AdminRejected" && (
+                        <span className={styles.moderationHint}>
+                          Please edit your service to address the issues and
+                          resubmit.
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className={styles.serviceFooter}>
+                  <div className={styles.serviceMeta}>
+                    <span className={styles.metaItem}>
+                      <DollarSign size={14} />
+                      {formatPrice(service.basePrice, service.priceType)}
+                    </span>
+                    <span className={styles.metaItem}>
+                      <Clock size={14} />
+                      {formatDuration(service.estimatedDurationMinutes)}
+                    </span>
+                    <span className={styles.metaItem}>
+                      <Tag size={14} />
+                      {PRICE_TYPE_LABELS[service.priceType as PriceType] ||
+                        service.priceType}
+                    </span>
+                  </div>
+                  <span
+                    className={`${styles.statusBadge} ${statusInfo.className}`}
                   >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    className={`${styles.actionButton} ${styles.deleteButton}`}
-                    onClick={() => handleDeleteClick(service.id)}
-                    disabled={deletingId === service.id}
-                    aria-label="Delete service"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                    {statusInfo.icon}
+                    {statusInfo.label}
+                  </span>
                 </div>
               </div>
-
-              <p className={styles.serviceDescription}>{service.description}</p>
-
-              <div className={styles.serviceFooter}>
-                <div className={styles.serviceMeta}>
-                  <span className={styles.metaItem}>
-                    <DollarSign size={14} />
-                    {formatPrice(service.basePrice, service.priceType)}
-                  </span>
-                  <span className={styles.metaItem}>
-                    <Clock size={14} />
-                    {formatDuration(service.estimatedDurationMinutes)}
-                  </span>
-                  <span className={styles.metaItem}>
-                    <Tag size={14} />
-                    {PRICE_TYPE_LABELS[service.priceType as PriceType] ||
-                      service.priceType}
-                  </span>
-                </div>
-                <span
-                  className={`${styles.statusBadge} ${
-                    service.isActive ? styles.active : styles.inactive
-                  }`}
-                >
-                  {service.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

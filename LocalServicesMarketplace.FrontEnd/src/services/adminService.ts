@@ -6,8 +6,7 @@ export type ModerationStatus =
   | "Pending"
   | "Approved"
   | "AiRejected"
-  | "AdminRejected"
-  | "AdminApproved";
+  | "AdminRejected";
 
 export interface ServiceModerationDto {
   id: number;
@@ -19,26 +18,18 @@ export interface ServiceModerationDto {
   providerId: string;
   providerName: string;
   providerBusinessName?: string;
+  providerEmail: string;
   moderationStatus: ModerationStatus;
-  aiReason?: string;
-  adminReason?: string;
+  moderationReason?: string;
   moderatedAt?: string;
   moderatedBy?: string;
   createdAt: string;
-}
-
-export interface GetPendingServicesResponse {
-  services: ServiceModerationDto[];
-  totalCount: number;
-  totalPages: number;
-  currentPage: number;
 }
 
 export interface GetRejectedServicesResponse {
   services: ServiceModerationDto[];
   totalCount: number;
   totalPages: number;
-  currentPage: number;
 }
 
 export interface ModerateServiceRequest {
@@ -48,7 +39,7 @@ export interface ModerateServiceRequest {
 
 export interface ModerateServiceResponse {
   serviceId: number;
-  newStatus: ModerationStatus;
+  newStatus: string;
   message: string;
 }
 
@@ -60,16 +51,11 @@ export interface DashboardStats {
   pendingServices: number;
   aiRejectedServices: number;
   approvedServices: number;
+  adminRejectedServices: number;
   totalBookings: number;
   completedBookings: number;
   totalReviews: number;
   averageRating: number;
-}
-
-export interface GetPendingServicesParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: "newest" | "oldest";
 }
 
 export interface GetRejectedServicesParams {
@@ -88,33 +74,22 @@ export const adminService = {
     return response.data;
   },
 
-  // Get pending services (waiting for moderation)
-  getPendingServices: async (
-    params?: GetPendingServicesParams,
-  ): Promise<GetPendingServicesResponse> => {
-    const queryParams = new URLSearchParams();
-    queryParams.append("page", String(params?.page || 1));
-    queryParams.append("pageSize", String(params?.pageSize || 20));
-    if (params?.sortBy) {
-      queryParams.append("sortBy", params.sortBy);
-    }
-
-    const response = await api.get<GetPendingServicesResponse>(
-      `/admin/services/pending?${queryParams.toString()}`,
-    );
-    return response.data;
-  },
-
-  // Get AI rejected services
+  // Get rejected services (AI rejected or Admin rejected)
   getRejectedServices: async (
     params?: GetRejectedServicesParams,
   ): Promise<GetRejectedServicesResponse> => {
     const queryParams = new URLSearchParams();
     queryParams.append("page", String(params?.page || 1));
     queryParams.append("pageSize", String(params?.pageSize || 20));
-    if (params?.status && params.status !== "all") {
-      queryParams.append("status", params.status);
+
+    // Map status to onlyAiRejected parameter for backend
+    if (params?.status === "AiRejected") {
+      queryParams.append("onlyAiRejected", "true");
+    } else if (params?.status === "AdminRejected") {
+      queryParams.append("onlyAiRejected", "false");
     }
+    // For "all", don't add the parameter - backend will return all rejected
+
     if (params?.sortBy) {
       queryParams.append("sortBy", params.sortBy);
     }
@@ -133,16 +108,6 @@ export const adminService = {
     const response = await api.post<ModerateServiceResponse>(
       `/admin/services/${serviceId}/moderate`,
       request,
-    );
-    return response.data;
-  },
-
-  // Get service details for moderation
-  getServiceDetails: async (
-    serviceId: number,
-  ): Promise<ServiceModerationDto> => {
-    const response = await api.get<ServiceModerationDto>(
-      `/admin/services/${serviceId}`,
     );
     return response.data;
   },

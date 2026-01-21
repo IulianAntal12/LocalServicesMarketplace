@@ -13,15 +13,34 @@ public class GetRejectedServicesHandler(ApplicationDbContext context)
     {
         var query = context.Services
             .Include(s => s.Provider)
-            .Where(s => request.OnlyAiRejected
-                ? s.ModerationStatus == ModerationStatus.AiRejected
-                : s.ModerationStatus == ModerationStatus.AiRejected ||
-                  s.ModerationStatus == ModerationStatus.AdminRejected)
-            .OrderByDescending(s => s.ModeratedAt ?? s.CreatedAt);
+            .AsQueryable();
 
+        // Filter by rejection type
+        if (request.OnlyAiRejected == true)
+        {
+            // Only AI rejected
+            query = query.Where(s => s.ModerationStatus == ModerationStatus.AiRejected);
+        }
+        else if (request.OnlyAiRejected == false)
+        {
+            // Only Admin rejected
+            query = query.Where(s => s.ModerationStatus == ModerationStatus.AdminRejected);
+        }
+        else
+        {
+            // All rejected (both AI and Admin) - when OnlyAiRejected is null
+            query = query.Where(s =>
+                s.ModerationStatus == ModerationStatus.AiRejected ||
+                s.ModerationStatus == ModerationStatus.AdminRejected);
+        }
+
+        // Get total count
         var totalCount = await query.CountAsync(ct);
-        var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
 
+        // Apply sorting
+        query = query.OrderByDescending(s => s.CreatedAt);
+
+        // Apply pagination
         var services = await query
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
@@ -44,6 +63,8 @@ public class GetRejectedServicesHandler(ApplicationDbContext context)
                 ProviderEmail = s.Provider.Email!
             })
             .ToListAsync(ct);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
 
         return Result<GetServicesResponse>.Success(new GetServicesResponse
         {

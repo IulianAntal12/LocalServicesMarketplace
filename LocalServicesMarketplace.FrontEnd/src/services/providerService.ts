@@ -1,22 +1,6 @@
 import api from "./api";
 
-// TYPES
-export interface ProviderListItem {
-  name: any;
-  category: ReactNode;
-  reviews: ReactNode;
-  location: ReactNode;
-  price: ReactNode;
-  id: string;
-  businessName: string;
-  businessDescription: string | null;
-  rating: number | null;
-  totalReviews: number;
-  city: string | null;
-  serviceAreas: string[];
-  serviceCount: number;
-  portfolioImageCount: number;
-}
+// ============= TYPES =============
 
 export interface ServiceDto {
   id: number;
@@ -27,44 +11,66 @@ export interface ServiceDto {
   priceType: string;
   estimatedDurationMinutes: number;
   isActive: boolean;
+  moderationStatus?: string;
+  moderationReason?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface PortfolioImageDto {
   id: number;
   imageUrl: string;
-  description: string | null;
+  caption?: string;
   displayOrder: number;
-  uploadedAt: string;
+  createdAt: string;
 }
 
 export interface ProviderProfile {
-  phoneNumber: string | null;
   id: string;
   email: string;
-  fullName: string;
-  businessName: string | null;
-  businessDescription: string | null;
-  hourlyRate: number | null;
-  serviceAreas: string[];
-  rating: number | null;
+  businessName?: string;
+  businessDescription?: string;
+  hourlyRate?: number;
+  rating?: number;
   totalReviews: number;
-  profilePictureUrl: string | null;
-  address: string | null;
-  city: string | null;
-  postalCode: string | null;
+  serviceAreas: string[];
+  phoneNumber?: string;
+  address?: string;
+  city?: string;
+  county?: string;
+  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  serviceRadiusKm?: number;
   services: ServiceDto[];
   portfolioImages: PortfolioImageDto[];
+}
+
+export interface ProviderListItem {
+  id: string;
+  businessName: string;
+  businessDescription?: string;
+  rating?: number;
+  totalReviews: number;
+  city?: string;
+  serviceAreas: string[];
+  serviceCount: number;
+  portfolioImageCount: number;
 }
 
 export interface UpdateProfileRequest {
   businessName?: string;
   businessDescription?: string;
-  phoneNumber?: string;
   hourlyRate?: number;
   serviceAreas?: string[];
+  phoneNumber?: string;
   address?: string;
   city?: string;
+  county?: string;
   postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  serviceRadiusKm?: number;
 }
 
 export interface CreateServiceRequest {
@@ -80,12 +86,22 @@ export interface UpdateServiceRequest {
   name?: string;
   description?: string;
   basePrice?: number;
-  isActive?: boolean;
+  priceType?: string;
+  estimatedDurationMinutes?: number;
 }
 
 export interface CreateServiceResponse {
   serviceId: number;
   message: string;
+  moderationStatus?: string;
+  moderationReason?: string;
+}
+
+export interface UpdateServiceResponse {
+  serviceId: number;
+  message: string;
+  moderationStatus?: string;
+  moderationReason?: string;
 }
 
 export interface SearchProvidersParams {
@@ -110,7 +126,7 @@ export const providerService = {
 
   // Search providers
   search: async (
-    params: SearchProvidersParams
+    params: SearchProvidersParams,
   ): Promise<ProviderListItem[]> => {
     const response = await api.get<ProviderListItem[]>("/providers/search", {
       params,
@@ -121,7 +137,7 @@ export const providerService = {
   // Get provider's services (public)
   getProviderServices: async (providerId: string): Promise<ServiceDto[]> => {
     const response = await api.get<ServiceDto[]>(
-      `/providers/${providerId}/services`
+      `/providers/${providerId}/services`,
     );
     return response.data;
   },
@@ -141,11 +157,11 @@ export const providerService = {
   // SERVICES CRUD
   // Create service
   createService: async (
-    data: CreateServiceRequest
+    data: CreateServiceRequest,
   ): Promise<CreateServiceResponse> => {
     const response = await api.post<CreateServiceResponse>(
       "/providers/services",
-      data
+      data,
     );
     return response.data;
   },
@@ -153,9 +169,13 @@ export const providerService = {
   // Update service
   updateService: async (
     serviceId: number,
-    data: UpdateServiceRequest
-  ): Promise<void> => {
-    await api.put(`/providers/services/${serviceId}`, data);
+    data: UpdateServiceRequest,
+  ): Promise<UpdateServiceResponse> => {
+    const response = await api.put<UpdateServiceResponse>(
+      `/providers/services/${serviceId}`,
+      data,
+    );
+    return response.data;
   },
 
   // Delete service

@@ -33,11 +33,11 @@ public class ModerateServiceHandler(
             service.IsActive = true;
             message = "Service approved successfully";
 
-            // Notify provider
+            // Notify provider about approval
             await notificationService.CreateAsync(
                 service.ProviderId,
-                "Service Approved",
-                $"Your service '{service.Name}' has been approved and is now visible to customers.",
+                "Service Approved ✓",
+                $"Great news! Your service '{service.Name}' has been approved and is now visible to customers.",
                 NotificationType.General);
         }
         else if (request.Action.Equals("reject", StringComparison.OrdinalIgnoreCase))
@@ -49,11 +49,11 @@ public class ModerateServiceHandler(
             service.IsActive = false;
             message = "Service rejected";
 
-            // Notify provider
+            // Notify provider about rejection with reason
             await notificationService.CreateAsync(
                 service.ProviderId,
                 "Service Rejected",
-                $"Your service '{service.Name}' has been rejected. Reason: {request.Reason}",
+                $"Your service '{service.Name}' has been rejected.\n\nReason: {request.Reason}\n\nPlease update your service listing to address these issues and try again.",
                 NotificationType.General);
         }
         else

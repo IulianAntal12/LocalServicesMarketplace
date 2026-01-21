@@ -23,7 +23,8 @@ export function ModerationModal({
   onComplete,
 }: ModerationModalProps) {
   const [action, setAction] = useState<"approve" | "reject" | null>(null);
-  const [reason, setReason] = useState(service.aiReason || "");
+  // Pre-fill reason with AI reason if available
+  const [reason, setReason] = useState(service.moderationReason || "");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -58,10 +59,14 @@ export function ModerationModal({
     }
   };
 
-  const formatPrice = (price: number, priceType: string): string => {
+  const formatPrice = (
+    price: number | undefined,
+    priceType: string,
+  ): string => {
+    if (price === undefined || price === null) return "N/A";
     if (priceType === "Quote") return "Request Quote";
     const suffix = priceType === "Hourly" ? "/hr" : "";
-    return `$${price.toFixed(2)}${suffix}`;
+    return `${price.toFixed(2)} RON${suffix}`;
   };
 
   const formatDate = (dateStr: string): string => {
@@ -133,16 +138,17 @@ export function ModerationModal({
           </div>
         </div>
 
-        {/* AI Reason (if rejected by AI) */}
-        {service.aiReason && (
-          <div className={styles.aiReasonBox}>
-            <div className={styles.aiReasonHeader}>
-              <Bot size={18} />
-              <span>AI Rejection Reason</span>
+        {/* AI Reason - Always visible if exists */}
+        {service.moderationReason &&
+          service.moderationStatus === "AiRejected" && (
+            <div className={styles.aiReasonBox}>
+              <div className={styles.aiReasonHeader}>
+                <Bot size={18} />
+                <span>AI Rejection Reason</span>
+              </div>
+              <p className={styles.aiReasonText}>{service.moderationReason}</p>
             </div>
-            <p className={styles.aiReasonText}>{service.aiReason}</p>
-          </div>
-        )}
+          )}
 
         {/* Action Selection */}
         <div className={styles.actionSection}>
@@ -158,16 +164,24 @@ export function ModerationModal({
               <span>Approve</span>
               <small>Service will be published</small>
             </button>
-            <button
-              className={`${styles.actionButton} ${styles.reject} ${
-                action === "reject" ? styles.selected : ""
-              }`}
-              onClick={() => setAction("reject")}
-            >
-              <X size={20} />
-              <span>Reject</span>
-              <small>Service will be rejected</small>
-            </button>
+            {service.moderationStatus !== "AdminRejected" && (
+              <button
+                className={`${styles.actionButton} ${styles.reject} ${
+                  action === "reject" ? styles.selected : ""
+                }`}
+                onClick={() => {
+                  setAction("reject");
+                  // Pre-fill with AI reason if not already set
+                  if (!reason && service.moderationReason) {
+                    setReason(service.moderationReason);
+                  }
+                }}
+              >
+                <X size={20} />
+                <span>Reject</span>
+                <small>Service will be rejected</small>
+              </button>
+            )}
           </div>
 
           {/* Rejection Reason */}
@@ -185,6 +199,9 @@ export function ModerationModal({
               />
               <small className={styles.reasonHint}>
                 This will be sent to the provider so they can fix the issues.
+                {service.moderationReason && (
+                  <> The AI reason has been pre-filled but you can modify it.</>
+                )}
               </small>
             </div>
           )}

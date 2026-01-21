@@ -5,13 +5,16 @@ import {
   ShoppingCart,
   Star,
   Clock,
-  XCircle,
   CheckCircle,
   Loader2,
   AlertCircle,
   TrendingUp,
+  UserX,
 } from "lucide-react";
-import { adminService, type DashboardStats } from "../../../../services/adminService";
+import {
+  adminService,
+  type DashboardStats,
+} from "../../../../services/adminService";
 import toast from "react-hot-toast";
 import styles from "./StatsTab.module.css";
 
@@ -26,7 +29,10 @@ interface StatCardProps {
 function StatCard({ title, value, icon, color, subtitle }: StatCardProps) {
   return (
     <div className={styles.statCard}>
-      <div className={styles.statIcon} style={{ background: `${color}15`, color }}>
+      <div
+        className={styles.statIcon}
+        style={{ background: `${color}15`, color }}
+      >
         {icon}
       </div>
       <div className={styles.statContent}>
@@ -84,6 +90,11 @@ export function StatsTab() {
     );
   }
 
+  const completionRate =
+    stats.totalBookings > 0
+      ? Math.round((stats.completedBookings / stats.totalBookings) * 100)
+      : 0;
+
   return (
     <div className={styles.container}>
       {/* Users Section */}
@@ -134,17 +145,17 @@ export function StatsTab() {
             color="#10B981"
           />
           <StatCard
-            title="Pending Review"
-            value={stats.pendingServices}
-            icon={<Clock size={24} />}
-            color="#F59E0B"
-          />
-          <StatCard
             title="AI Rejected"
             value={stats.aiRejectedServices}
-            icon={<XCircle size={24} />}
+            icon={<Clock size={24} />}
+            color="#F59E0B"
+            subtitle="Needs review"
+          />
+          <StatCard
+            title="Admin Rejected"
+            value={stats.adminRejectedServices}
+            icon={<UserX size={24} />}
             color="#EF4444"
-            subtitle="Needs manual review"
           />
         </div>
       </section>
@@ -167,7 +178,7 @@ export function StatsTab() {
             value={stats.completedBookings}
             icon={<CheckCircle size={24} />}
             color="#10B981"
-            subtitle={`${stats.totalBookings > 0 ? Math.round((stats.completedBookings / stats.totalBookings) * 100) : 0}% completion rate`}
+            subtitle={`${completionRate}% completion rate`}
           />
         </div>
       </section>
@@ -187,7 +198,9 @@ export function StatsTab() {
           />
           <StatCard
             title="Average Rating"
-            value={stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "—"}
+            value={
+              stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "—"
+            }
             icon={<TrendingUp size={24} />}
             color="#10B981"
             subtitle="Platform average"

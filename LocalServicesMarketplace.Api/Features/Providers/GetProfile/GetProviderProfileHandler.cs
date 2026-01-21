@@ -59,7 +59,9 @@ public class GetProviderProfileHandler(ApplicationDbContext context, ICurrentUse
                 Category = s.Category,
                 BasePrice = s.BasePrice,
                 PriceType = s.PriceType,
-                IsActive = s.IsActive
+                IsActive = s.IsActive,
+                ModerationStatus = s.ModerationStatus.ToString(),
+                ModerationReason = s.ModerationReason
             })],
             PortfolioImages = [.. provider.PortfolioImages
                 .OrderBy(p => p.DisplayOrder)
