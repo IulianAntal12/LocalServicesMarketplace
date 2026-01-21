@@ -71,8 +71,8 @@ public class ProviderEndpoints : IEndpoint
         group.MapPut("/services/{serviceId}", UpdateServiceAsync)
             .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("UpdateService")
-            .WithSummary("Update service details")
-            .Produces(StatusCodes.Status204NoContent);
+            .WithSummary("Update service details with AI re-moderation")
+            .Produces<UpdateServiceResponse>();
 
         group.MapDelete("/services/{serviceId}", DeleteServiceAsync)
             .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
@@ -81,11 +81,69 @@ public class ProviderEndpoints : IEndpoint
             .Produces(StatusCodes.Status204NoContent);
     }
 
+    private static async Task<IResult> GetAllProvidersAsync(ApplicationDbContext context, CancellationToken ct)
+    {
+        var providers = await context.Users
+            .Where(u => u.IsActive && u.BusinessName != null)
+            .Select(u => new ProviderListDto
+            {
+                Id = u.Id,
+                BusinessName = u.BusinessName!,
+                BusinessDescription = u.BusinessDescription,
+                Rating = u.Rating,
+                TotalReviews = u.TotalReviews,
+                City = u.City,
+                ServiceAreas = u.ServiceAreas,
+                ServiceCount = u.Services.Count(s => s.IsActive && s.ModerationStatus == ModerationStatus.Approved),
+                PortfolioImageCount = u.PortfolioImages.Count()
+            })
+            .ToListAsync(ct);
+
+        return Results.Ok(providers);
+    }
+
     private static async Task<IResult> GetProviderByIdAsync(string providerId, IMediator mediator, CancellationToken ct)
     {
         var query = new GetProviderProfileQuery { ProviderId = providerId };
         var result = await mediator.Send(query, ct);
         return result.ToApiResponse();
+    }
+
+    private static async Task<IResult> SearchProvidersAsync(
+        [FromQuery] string? category,
+        [FromQuery] string? location,
+        ApplicationDbContext context,
+        CancellationToken ct)
+    {
+        var query = context.Users
+            .Where(u => u.IsActive && u.BusinessName != null);
+
+        if (!string.IsNullOrEmpty(location))
+        {
+            query = query.Where(u => u.City!.Contains(location) || u.ServiceAreas.Any(sa => sa.Contains(location)));
+        }
+
+        if (!string.IsNullOrEmpty(category))
+        {
+            query = query.Where(u => u.Services.Any(s => s.Category == category && s.IsActive && s.ModerationStatus == ModerationStatus.Approved));
+        }
+
+        var providers = await query
+            .Select(u => new ProviderListDto
+            {
+                Id = u.Id,
+                BusinessName = u.BusinessName!,
+                BusinessDescription = u.BusinessDescription,
+                Rating = u.Rating,
+                TotalReviews = u.TotalReviews,
+                City = u.City,
+                ServiceAreas = u.ServiceAreas,
+                ServiceCount = u.Services.Count(s => s.IsActive && s.ModerationStatus == ModerationStatus.Approved),
+                PortfolioImageCount = u.PortfolioImages.Count()
+            })
+            .ToListAsync(ct);
+
+        return Results.Ok(providers);
     }
 
     private static async Task<IResult> GetMyProfileAsync(IMediator mediator, CancellationToken ct)
@@ -113,71 +171,14 @@ public class ProviderEndpoints : IEndpoint
         return result.ToApiResponse();
     }
 
-    private static async Task<IResult> GetAllProvidersAsync(ApplicationDbContext context, CancellationToken ct)
-    {
-        var providers = await context.Users
-            .Where(u => u.IsActive && u.BusinessName != null)
-            .Select(u => new ProviderListDto
-            {
-                Id = u.Id,
-                BusinessName = u.BusinessName!,
-                BusinessDescription = u.BusinessDescription,
-                Rating = u.Rating,
-                TotalReviews = u.TotalReviews,
-                City = u.City,
-                ServiceAreas = u.ServiceAreas,
-                ServiceCount = u.Services.Count(s => s.IsActive),
-                PortfolioImageCount = u.PortfolioImages.Count()
-            })
-            .ToListAsync(ct);
-
-        return Results.Ok(providers);
-    }
-
-    private static async Task<IResult> SearchProvidersAsync(
-        [FromQuery] string? category,
-        [FromQuery] string? location,
-        ApplicationDbContext context,
-        CancellationToken ct)
-    {
-        var query = context.Users
-            .Where(u => u.IsActive && u.BusinessName != null);
-
-        if (!string.IsNullOrEmpty(location))
-        {
-            query = query.Where(u => u.City!.Contains(location) || u.ServiceAreas.Any(sa => sa.Contains(location)));
-        }
-
-        if (!string.IsNullOrEmpty(category))
-        {
-            query = query.Where(u => u.Services.Any(s => s.Category == category && s.IsActive));
-        }
-
-        var providers = await query
-            .Select(u => new ProviderListDto
-            {
-                Id = u.Id,
-                BusinessName = u.BusinessName!,
-                BusinessDescription = u.BusinessDescription,
-                Rating = u.Rating,
-                TotalReviews = u.TotalReviews,
-                City = u.City,
-                ServiceAreas = u.ServiceAreas,
-                ServiceCount = u.Services.Count(s => s.IsActive),
-                PortfolioImageCount = u.PortfolioImages.Count()
-            })
-            .ToListAsync(ct);
-
-        return Results.Ok(providers);
-    }
-
     private static async Task<IResult> GetProviderServicesAsync(
         string providerId,
         ApplicationDbContext context,
         CancellationToken ct)
     {
         var services = await context.Set<Service>()
-            .Where(s => s.ProviderId == providerId && s.IsActive)
+            .Where(s => s.ProviderId == providerId && s.IsActive && s.ModerationStatus == ModerationStatus.Approved)
+            .OrderByDescending(s => s.CreatedAt)
             .Select(s => new ServiceDto
             {
                 Id = s.Id,
@@ -186,7 +187,8 @@ public class ProviderEndpoints : IEndpoint
                 Category = s.Category,
                 BasePrice = s.BasePrice,
                 PriceType = s.PriceType,
-                EstimatedDurationMinutes = s.EstimatedDurationMinutes
+                EstimatedDurationMinutes = s.EstimatedDurationMinutes,
+                IsActive = s.IsActive
             })
             .ToListAsync(ct);
 
@@ -198,6 +200,8 @@ public class ProviderEndpoints : IEndpoint
         [FromBody] UpdateServiceRequest request,
         ApplicationDbContext context,
         ICurrentUserService currentUser,
+        IGeminiService geminiService,
+        ILogger<ProviderEndpoints> logger,
         CancellationToken ct)
     {
         var service = await context.Set<Service>()
@@ -206,15 +210,82 @@ public class ProviderEndpoints : IEndpoint
         if (service == null)
             return Results.NotFound();
 
+        // Check if content changed (name or description)
+        var nameChanged = request.Name != null && request.Name != service.Name;
+        var descriptionChanged = request.Description != null && request.Description != service.Description;
+
+        // Update fields
         service.Name = request.Name ?? service.Name;
         service.Description = request.Description ?? service.Description;
         service.BasePrice = request.BasePrice ?? service.BasePrice;
-        service.IsActive = request.IsActive ?? service.IsActive;
         service.UpdatedAt = DateTime.UtcNow;
 
+        // Always re-run AI moderation when name or description changes
+        if (nameChanged || descriptionChanged)
+        {
+            logger.LogInformation("Content changed for service {ServiceId}, re-running AI moderation", serviceId);
+
+            var moderationResult = await geminiService.ModerateServiceAsync(
+                service.Name,
+                service.Description,
+                service.Category,
+                service.BasePrice,
+                ct);
+
+            logger.LogInformation(
+                "AI Moderation result for updated service '{ServiceName}': Approved={IsApproved}, Reason={Reason}",
+                service.Name,
+                moderationResult.IsApproved,
+                moderationResult.Reason);
+
+            var oldStatus = service.ModerationStatus;
+
+            // Update moderation status based on AI result
+            service.ModerationStatus = moderationResult.IsApproved
+                ? ModerationStatus.Approved
+                : ModerationStatus.AiRejected;
+            service.ModerationReason = moderationResult.Reason;
+            service.ModeratedAt = DateTime.UtcNow;
+            service.ModeratedBy = null; // null indicates AI moderation
+            service.IsActive = moderationResult.IsApproved;
+
+            // Create moderation log
+            var moderationLog = new ModerationLog
+            {
+                ServiceId = service.Id,
+                OldStatus = oldStatus,
+                NewStatus = service.ModerationStatus,
+                Reason = moderationResult.Reason,
+                ModeratedBy = null, // AI
+                CreatedAt = DateTime.UtcNow
+            };
+            context.ModerationLogs.Add(moderationLog);
+
+            await context.SaveChangesAsync(ct);
+
+            var message = moderationResult.IsApproved
+                ? "Service updated and approved!"
+                : "Service updated but requires review. Reason: " + moderationResult.Reason;
+
+            return Results.Ok(new UpdateServiceResponse
+            {
+                ServiceId = service.Id,
+                Message = message,
+                ModerationStatus = service.ModerationStatus.ToString(),
+                ModerationReason = moderationResult.IsApproved ? null : moderationResult.Reason
+            });
+        }
+
+        // No content change, just save
         await context.SaveChangesAsync(ct);
 
-        return Results.NoContent();
+        return Results.Ok(new UpdateServiceResponse
+        {
+            ServiceId = service.Id,
+            Message = "Service updated successfully!",
+            ModerationStatus = service.ModerationStatus.ToString(),
+            ModerationReason = null
+        });
     }
 
     private static async Task<IResult> DeleteServiceAsync(
@@ -255,5 +326,12 @@ public class UpdateServiceRequest
     public string? Name { get; set; }
     public string? Description { get; set; }
     public decimal? BasePrice { get; set; }
-    public bool? IsActive { get; set; }
+}
+
+public class UpdateServiceResponse
+{
+    public int ServiceId { get; set; }
+    public required string Message { get; set; }
+    public string? ModerationStatus { get; set; }
+    public string? ModerationReason { get; set; }
 }

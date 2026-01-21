@@ -1,5 +1,4 @@
 ﻿using LocalServicesMarketplace.Api.Features.SharedDTOs;
-using LocalServicesMarketplace.Api.Services;
 using LocalServicesMarketplace.Api.Services.Interfaces;
 using LocalServicesMarketplace.Core.Common;
 using LocalServicesMarketplace.Core.Constants;
@@ -59,6 +58,7 @@ public class GetProviderProfileHandler(ApplicationDbContext context, ICurrentUse
                 Category = s.Category,
                 BasePrice = s.BasePrice,
                 PriceType = s.PriceType,
+                EstimatedDurationMinutes = s.EstimatedDurationMinutes,
                 IsActive = s.IsActive,
                 ModerationStatus = s.ModerationStatus.ToString(),
                 ModerationReason = s.ModerationReason
