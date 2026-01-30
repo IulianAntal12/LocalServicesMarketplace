@@ -1,6 +1,10 @@
 using LocalServicesMarketplace.Api.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    WebRootPath = ""
+});
 
 // Add services
 builder.Services.AddApplicationServices(builder.Configuration);
@@ -26,7 +30,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 
-app.UseStaticFiles(); // This serves files from wwwroot
+// Output cache for MongoDB images
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -8,7 +8,11 @@ using System.Net;
 
 namespace LocalServicesMarketplace.Api.Features.Portofolio.UploadImage;
 
-public class UploadImageHandler(ApplicationDbContext context, IFileStorageService fileStorage, ICurrentUserService currentUser)
+public class UploadImageHandler(
+    ApplicationDbContext context,
+    IMongoStorageService mongoStorage,
+    ICurrentUserService currentUser,
+    ILogger<UploadImageHandler> logger)
     : IRequestHandler<UploadImageCommand, Result<UploadImageResponse>>
 {
     private const int MaxImagesPerProvider = 20;
@@ -26,19 +30,23 @@ public class UploadImageHandler(ApplicationDbContext context, IFileStorageServic
         if (currentImageCount >= MaxImagesPerProvider)
             return Result<UploadImageResponse>.BadRequest($"Maximum {MaxImagesPerProvider} images allowed!");
 
-        // Validate and upload file
-        if (!fileStorage.ValidateImage(request.File))
-            return Result<UploadImageResponse>.BadRequest("Invalid image file. Max 5MB, jpg/png only!");
+        // Validate image
+        if (!mongoStorage.ValidateImage(request.File))
+            return Result<UploadImageResponse>.BadRequest("Invalid image file. Max 5MB, jpg/png/webp only!");
 
         try
         {
-            var filePath = await fileStorage.UploadImageAsync(request.File, currentUser.UserId!);
+            // Upload to MongoDB GridFS
+            var mongoFileId = await mongoStorage.UploadImageAsync(request.File, currentUser.UserId!);
+
+            logger.LogInformation("Image uploaded to MongoDB. FileId: {FileId}, Provider: {ProviderId}",
+                mongoFileId, currentUser.UserId);
 
             var portfolioImage = new PortfolioImage
             {
                 ProviderId = currentUser.UserId!,
                 FileName = request.File.FileName,
-                FilePath = filePath,
+                FilePath = mongoFileId, // Store MongoDB ObjectId
                 Description = request.Description,
                 DisplayOrder = currentImageCount + 1,
                 FileSizeBytes = request.File.Length,
@@ -51,12 +59,13 @@ public class UploadImageHandler(ApplicationDbContext context, IFileStorageServic
             return Result<UploadImageResponse>.Success(new UploadImageResponse
             {
                 ImageId = portfolioImage.Id,
-                ImageUrl = $"/{filePath}",
+                ImageUrl = $"/api/images/{mongoFileId}", // New URL format
                 FileName = portfolioImage.FileName
             }, HttpStatusCode.Created);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to upload image for provider {ProviderId}", currentUser.UserId);
             return Result<UploadImageResponse>.Failure(
                 HttpStatusCode.InternalServerError,
                 "Failed to upload image.");

@@ -9,6 +9,7 @@ using LocalServicesMarketplace.Core.Entities;
 using LocalServicesMarketplace.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocalServicesMarketplace.Api.Features.Portofolio;
@@ -25,7 +26,7 @@ public class PortfolioEndpoints : IEndpoint
         group.MapPost("/upload", UploadPortfolioImageAsync)
             .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("UploadPortfolioImage")
-            .WithSummary("Upload portfolio image")
+            .WithSummary("Upload portfolio image to MongoDB")
             .Produces<UploadImageResponse>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .DisableAntiforgery();
@@ -33,7 +34,7 @@ public class PortfolioEndpoints : IEndpoint
         group.MapDelete("/{imageId}", DeletePortfolioImageAsync)
             .RequireAuthorization(new AuthorizeAttribute { Roles = Roles.Provider })
             .WithName("DeletePortfolioImage")
-            .WithSummary("Delete portfolio image")
+            .WithSummary("Delete portfolio image from MongoDB")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -63,7 +64,11 @@ public class PortfolioEndpoints : IEndpoint
             .Produces<PortfolioCountResponse>();
     }
 
-    private static async Task<IResult> UploadPortfolioImageAsync(IFormFile file, string? description, IMediator mediator, CancellationToken ct)
+    private static async Task<IResult> UploadPortfolioImageAsync(
+        IFormFile file,
+        [FromForm] string? description,
+        IMediator mediator,
+        CancellationToken ct)
     {
         var command = new UploadImageCommand
         {
@@ -74,14 +79,20 @@ public class PortfolioEndpoints : IEndpoint
         return result.ToApiResponse();
     }
 
-    private static async Task<IResult> DeletePortfolioImageAsync(int imageId, IMediator mediator, CancellationToken ct)
+    private static async Task<IResult> DeletePortfolioImageAsync(
+        int imageId,
+        IMediator mediator,
+        CancellationToken ct)
     {
         var command = new DeletePortfolioImageCommand { ImageId = imageId };
         var result = await mediator.Send(command, ct);
         return result.ToApiResponse();
     }
 
-    private static async Task<IResult> GetMyPortfolioAsync(ApplicationDbContext context, ICurrentUserService currentUser, CancellationToken ct)
+    private static async Task<IResult> GetMyPortfolioAsync(
+        ApplicationDbContext context,
+        ICurrentUserService currentUser,
+        CancellationToken ct)
     {
         var images = await context.Set<PortfolioImage>()
             .Where(p => p.ProviderId == currentUser.UserId)
@@ -89,7 +100,7 @@ public class PortfolioEndpoints : IEndpoint
             .Select(p => new PortfolioImageDto
             {
                 Id = p.Id,
-                ImageUrl = "/" + p.FilePath,
+                ImageUrl = $"/api/images/{p.FilePath}", // MongoDB URL format
                 Description = p.Description,
                 DisplayOrder = p.DisplayOrder,
                 UploadedAt = p.UploadedAt
@@ -99,7 +110,10 @@ public class PortfolioEndpoints : IEndpoint
         return Results.Ok(images);
     }
 
-    private static async Task<IResult> GetProviderPortfolioAsync(string providerId, ApplicationDbContext context, CancellationToken ct)
+    private static async Task<IResult> GetProviderPortfolioAsync(
+        string providerId,
+        ApplicationDbContext context,
+        CancellationToken ct)
     {
         var images = await context.Set<PortfolioImage>()
             .Where(p => p.ProviderId == providerId)
@@ -107,7 +121,7 @@ public class PortfolioEndpoints : IEndpoint
             .Select(p => new PortfolioImageDto
             {
                 Id = p.Id,
-                ImageUrl = "/" + p.FilePath,
+                ImageUrl = $"/api/images/{p.FilePath}", // MongoDB URL format
                 Description = p.Description,
                 DisplayOrder = p.DisplayOrder,
                 UploadedAt = p.UploadedAt
@@ -117,7 +131,10 @@ public class PortfolioEndpoints : IEndpoint
         return Results.Ok(images);
     }
 
-    private static async Task<IResult> GetProviderPortfolioCountAsync(string providerId, ApplicationDbContext context, CancellationToken ct)
+    private static async Task<IResult> GetProviderPortfolioCountAsync(
+        string providerId,
+        ApplicationDbContext context,
+        CancellationToken ct)
     {
         var count = await context.Set<PortfolioImage>()
             .CountAsync(p => p.ProviderId == providerId, ct);
@@ -145,13 +162,12 @@ public class PortfolioEndpoints : IEndpoint
     }
 }
 
-// DTOs for Portfolio endpoints
-public class PortfolioCountResponse
-{
-    public int Count { get; set; }
-}
-
 public class ReorderRequest
 {
     public int NewOrder { get; set; }
+}
+
+public class PortfolioCountResponse
+{
+    public int Count { get; set; }
 }

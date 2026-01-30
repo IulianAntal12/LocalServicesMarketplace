@@ -26,6 +26,9 @@ public static class ServiceExtensions
         services.AddApplicationDependencies();
         services.AddCorsPolicy();
 
+        // Add Output Caching for image endpoints
+        services.AddOutputCache();
+
         return services;
     }
 
@@ -171,8 +174,10 @@ public static class ServiceExtensions
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-        services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        // MongoDB Storage Service (replaces LocalFileStorageService)
+        services.AddSingleton<IMongoStorageService, MongoStorageService>();
 
         // Gemini AI Service
         services.AddScoped<IGeminiService, GeminiService>();

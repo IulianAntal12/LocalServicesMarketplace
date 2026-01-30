@@ -31,6 +31,9 @@ public class GetProviderProfileHandler(ApplicationDbContext context, ICurrentUse
         if (provider == null)
             return Result<ProviderProfileResponse>.NotFound("Provider not found.");
 
+        // Check if this is the provider viewing their own profile
+        var isOwnProfile = currentUser.UserId == providerId;
+
         var response = new ProviderProfileResponse
         {
             Id = provider.Id,
@@ -50,25 +53,27 @@ public class GetProviderProfileHandler(ApplicationDbContext context, ICurrentUse
             Latitude = provider.Latitude,
             Longitude = provider.Longitude,
             ServiceRadiusKm = provider.ServiceRadiusKm,
-            Services = [.. provider.Services.Select(s => new ServiceDto
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Description = s.Description,
-                Category = s.Category,
-                BasePrice = s.BasePrice,
-                PriceType = s.PriceType,
-                EstimatedDurationMinutes = s.EstimatedDurationMinutes,
-                IsActive = s.IsActive,
-                ModerationStatus = s.ModerationStatus.ToString(),
-                ModerationReason = s.ModerationReason
-            })],
+            Services = [.. provider.Services
+                .Where(s => isOwnProfile || (s.IsActive && s.ModerationStatus == Core.Entities.ModerationStatus.Approved))
+                .Select(s => new ServiceDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Description = s.Description,
+                    Category = s.Category,
+                    BasePrice = s.BasePrice,
+                    PriceType = s.PriceType,
+                    EstimatedDurationMinutes = s.EstimatedDurationMinutes,
+                    IsActive = s.IsActive,
+                    ModerationStatus = s.ModerationStatus.ToString(),
+                    ModerationReason = s.ModerationReason
+                })],
             PortfolioImages = [.. provider.PortfolioImages
                 .OrderBy(p => p.DisplayOrder)
                 .Select(p => new PortfolioImageDto
                 {
                     Id = p.Id,
-                    ImageUrl = "/" + p.FilePath,
+                    ImageUrl = $"/api/images/{p.FilePath}", // MongoDB URL format
                     Description = p.Description,
                     UploadedAt = p.UploadedAt
                 })]
