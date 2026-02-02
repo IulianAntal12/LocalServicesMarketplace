@@ -1,11 +1,12 @@
 import { useState, useRef } from "react";
-import { Upload, Trash2, Image, Loader2, X } from "lucide-react";
+import { Upload, Trash2, Image, Loader2, X, AlertTriangle } from "lucide-react";
 import type { PortfolioImageDto } from "../../../../services/providerService";
 import { portfolioService } from "../../../../services/portfolioService";
 import { Button } from "../../../../components/common/Button";
 import { Modal } from "../../../../components/common/Modal";
 import { Input } from "../../../../components/common/Input";
 import toast from "react-hot-toast";
+import axios from "axios";
 import styles from "./PortfolioTab.module.css";
 
 interface PortfolioTabProps {
@@ -24,9 +25,13 @@ export function PortfolioTab({ images, onUpdate }: PortfolioTabProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [viewingImage, setViewingImage] = useState<PortfolioImageDto | null>(
-    null
+    null,
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Error modal state
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,14 +62,36 @@ export function PortfolioTab({ images, onUpdate }: PortfolioTabProps) {
       setUploading(true);
       await portfolioService.uploadImage(
         selectedFile,
-        description || undefined
+        description || undefined,
       );
       toast.success("Image uploaded successfully!");
       handleCloseUploadModal();
       onUpdate();
     } catch (err) {
-      toast.error("Failed to upload image. Please try again.");
       console.error("Error uploading image:", err);
+
+      // Extract error message from backend response
+      let message = "Failed to upload image. Please try again.";
+
+      if (axios.isAxiosError(err)) {
+        const responseData = err.response?.data;
+
+        // Handle different error response formats
+        if (typeof responseData === "string") {
+          message = responseData;
+        } else if (responseData?.message) {
+          message = responseData.message;
+        } else if (responseData?.errors && Array.isArray(responseData.errors)) {
+          message = responseData.errors.join("\n");
+        } else if (responseData?.title) {
+          message = responseData.title;
+        }
+      }
+
+      // Close upload modal and show error modal
+      handleCloseUploadModal();
+      setErrorMessage(message);
+      setIsErrorModalOpen(true);
     } finally {
       setUploading(false);
     }
@@ -100,6 +127,11 @@ export function PortfolioTab({ images, onUpdate }: PortfolioTabProps) {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleCloseErrorModal = () => {
+    setIsErrorModalOpen(false);
+    setErrorMessage("");
   };
 
   const handleImageClick = (image: PortfolioImageDto) => {
@@ -247,7 +279,7 @@ export function PortfolioTab({ images, onUpdate }: PortfolioTabProps) {
                 {uploading ? (
                   <>
                     <Loader2 size={18} className={styles.spinner} />
-                    Uploading...
+                    Analyzing & Uploading...
                   </>
                 ) : (
                   <>
@@ -257,6 +289,32 @@ export function PortfolioTab({ images, onUpdate }: PortfolioTabProps) {
                 )}
               </Button>
             </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Error Modal - for AI rejection messages */}
+      <Modal
+        isOpen={isErrorModalOpen}
+        onClose={handleCloseErrorModal}
+        title="Image Upload Failed"
+        size="medium"
+      >
+        <div className={styles.errorModal}>
+          <div className={styles.errorIconWrapper}>
+            <AlertTriangle size={48} className={styles.errorIcon} />
+          </div>
+          <div className={styles.errorContent}>
+            <p className={styles.errorText}>{errorMessage}</p>
+            <p className={styles.errorHint}>
+              Please upload an image that shows your work, completed projects,
+              tools, or equipment related to home services.
+            </p>
+          </div>
+          <div className={styles.errorActions}>
+            <Button onClick={handleCloseErrorModal}>
+              Got it, I'll try another image
+            </Button>
           </div>
         </div>
       </Modal>

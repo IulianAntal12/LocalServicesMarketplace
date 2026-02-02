@@ -48,8 +48,8 @@ public class GeminiService : IGeminiService
         try
         {
             var prompt = BuildModerationPrompt(serviceName, description, category, price);
-            var response = await CallGeminiApiAsync(prompt, ct);
-            return ParseModerationResponse(response);
+            var response = await CallGeminiTextApiAsync(prompt, ct);
+            return ParseServiceModerationResponse(response);
         }
         catch (Exception ex)
         {
@@ -61,6 +61,43 @@ public class GeminiService : IGeminiService
                 IsApproved = true,
                 Reason = "AI moderation temporarily unavailable - auto-approved for review",
                 ConfidenceScore = 0.0
+            };
+        }
+    }
+
+    public async Task<ImageModerationResult> ModerateImageAsync(
+        byte[] imageBytes,
+        string contentType,
+        string providerCategory,
+        CancellationToken ct = default)
+    {
+        if (!_isEnabled)
+        {
+            _logger.LogInformation("AI image moderation disabled, auto-approving image");
+            return new ImageModerationResult
+            {
+                IsApproved = true,
+                Reason = "AI moderation not configured - auto-approved",
+                ConfidenceScore = 1.0,
+                DetectedCategories = []
+            };
+        }
+
+        try
+        {
+            var prompt = BuildImageModerationPrompt(providerCategory);
+            var response = await CallGeminiVisionApiAsync(prompt, imageBytes, contentType, ct);
+            return ParseImageModerationResponse(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calling Gemini Vision API for image moderation");
+            return new ImageModerationResult
+            {
+                IsApproved = true,
+                Reason = "AI image moderation temporarily unavailable - auto-approved for review",
+                ConfidenceScore = 0.0,
+                DetectedCategories = []
             };
         }
     }
@@ -107,7 +144,7 @@ public class GeminiService : IGeminiService
             .Replace("{price}", price.ToString());
     }
 
-    private async Task<string> CallGeminiApiAsync(string prompt, CancellationToken ct)
+    private async Task<string> CallGeminiTextApiAsync(string prompt, CancellationToken ct)
     {
         var googleAi = new GoogleAI(_apiKey);
         var model = googleAi.GenerativeModel(Model.Gemini3Flash);
@@ -117,27 +154,14 @@ public class GeminiService : IGeminiService
         return response.Text ?? throw new InvalidOperationException("Empty response from Gemini API");
     }
 
-    private ModerationResult ParseModerationResponse(string apiResponse)
+    private ModerationResult ParseServiceModerationResponse(string apiResponse)
     {
         try
         {
             _logger.LogDebug("Gemini API response: {Response}", apiResponse);
 
             // Clean up the response (remove potential markdown formatting)
-            var text = apiResponse.Trim();
-            if (text.StartsWith("```json"))
-            {
-                text = text[7..];
-            }
-            if (text.StartsWith("```"))
-            {
-                text = text[3..];
-            }
-            if (text.EndsWith("```"))
-            {
-                text = text[..^3];
-            }
-            text = text.Trim();
+            var text = CleanJsonResponse(apiResponse);
 
             // Parse the JSON response
             using var doc = JsonDocument.Parse(text);
@@ -164,5 +188,175 @@ public class GeminiService : IGeminiService
                 ConfidenceScore = 0.0
             };
         }
+    }
+
+    private static string BuildImageModerationPrompt(string providerCategory)
+    {
+        return """
+            You are an image moderator for a local home services marketplace platform.
+            
+            The provider offers services in the category: "{providerCategory}"
+            
+            Analyze this portfolio image and determine if it should be APPROVED or REJECTED.
+            
+            REJECTION CRITERIA (reject if ANY apply):
+            1. NSFW content (nudity, sexual content, pornography)
+            2. Violence, gore, or disturbing imagery
+            3. Hate symbols, offensive gestures, or discriminatory content
+            4. Spam images (random memes, unrelated stock photos)
+            5. Images of pets/animals that are not related to pet services
+            6. Selfies or personal photos not showing work
+            7. Screenshots of social media, text messages, or other apps
+            8. Completely blurry or unrecognizable images
+            9. Images with visible personal information (IDs, addresses, phone numbers)
+            10. Advertising or promotional content for other businesses
+            
+            APPROVAL CRITERIA (approve if image shows ANY of these):
+            1. Completed work projects (before/after photos)
+            2. Tools, equipment, or materials related to home services
+            3. Work in progress on homes, buildings, gardens, appliances
+            4. Professional photos of: kitchens, bathrooms, plumbing, electrical work,
+               painting, flooring, roofing, landscaping, cleaning results, HVAC systems,
+               furniture assembly, home repairs, renovations, installations
+            5. Workspaces, workshops, or service vehicles
+            6. Team photos in work context (uniforms, job sites)
+            
+            Respond ONLY with a JSON object in this exact format (no markdown, no extra text):
+            {"approved": true, "reason": "Brief explanation", "confidence": 0.95, "detected_categories": ["list", "of", "what", "you", "see"]}
+            
+            Examples:
+            {"approved": true, "reason": "Shows completed bathroom renovation with new tiles and fixtures", "confidence": 0.95, "detected_categories": ["bathroom", "tiles", "renovation", "plumbing"]}
+            {"approved": false, "reason": "Image shows a cat which is not relevant to home services", "confidence": 0.98, "detected_categories": ["cat", "pet", "animal"]}
+            {"approved": false, "reason": "NSFW content detected - image contains nudity", "confidence": 0.99, "detected_categories": ["nsfw", "inappropriate"]}
+            {"approved": true, "reason": "Professional photo of garden landscaping work", "confidence": 0.92, "detected_categories": ["garden", "landscaping", "outdoor", "plants"]}
+            """
+            .Replace("{providerCategory}", providerCategory);
+    }
+
+    private async Task<string> CallGeminiVisionApiAsync(
+        string prompt,
+        byte[] imageBytes,
+        string contentType,
+        CancellationToken ct)
+    {
+        var googleAi = new GoogleAI(_apiKey);
+        var model = googleAi.GenerativeModel(Model.Gemini3Flash);
+
+        // Convert image bytes to base64 for the API
+        var base64Image = Convert.ToBase64String(imageBytes);
+
+        // Create the request with image
+        var request = new GenerateContentRequest
+        {
+            Contents =
+            [
+                new Content
+                {
+                    Role = "user",
+                    Parts =
+                    [
+                        new Part { Text = prompt },
+                        new Part
+                        {
+                            InlineData = new InlineData
+                            {
+                                MimeType = contentType,
+                                Data = base64Image
+                            }
+                        }
+                    ]
+                }
+            ],
+            GenerationConfig = new GenerationConfig
+            {
+                Temperature = 0.1f,
+                MaxOutputTokens = 1024
+            }
+        };
+
+        var response = await model.GenerateContent(request, cancellationToken: ct);
+
+        // Log the full response for debugging
+        _logger.LogDebug("Gemini Vision full response: {@Response}", response);
+
+        // Try to get text from different possible locations
+        var text = response.Text;
+        
+        if (string.IsNullOrEmpty(text) && response.Candidates?.Count > 0)
+        {
+            var candidate = response.Candidates[0];
+            if (candidate.Content?.Parts?.Count > 0)
+            {
+                text = candidate.Content.Parts[0].Text;
+            }
+            
+            // Log if there's a finish reason that might indicate an issue
+            _logger.LogDebug("Candidate finish reason: {FinishReason}", candidate.FinishReason);
+        }
+
+        if (string.IsNullOrEmpty(text))
+        {
+            _logger.LogWarning("Empty response from Gemini Vision API. Response object: {@Response}", response);
+            throw new InvalidOperationException("Empty response from Gemini Vision API");
+        }
+
+        return text;
+    }
+
+    private ImageModerationResult ParseImageModerationResponse(string apiResponse)
+    {
+        try
+        {
+            _logger.LogDebug("Gemini Vision API response: {Response}", apiResponse);
+
+            var text = CleanJsonResponse(apiResponse);
+            using var doc = JsonDocument.Parse(text);
+            var root = doc.RootElement;
+
+            var detectedCategories = new List<string>();
+            if (root.TryGetProperty("detected_categories", out var categoriesElement))
+            {
+                foreach (var category in categoriesElement.EnumerateArray())
+                {
+                    var cat = category.GetString();
+                    if (!string.IsNullOrEmpty(cat))
+                        detectedCategories.Add(cat);
+                }
+            }
+
+            return new ImageModerationResult
+            {
+                IsApproved = root.GetProperty("approved").GetBoolean(),
+                Reason = root.GetProperty("reason").GetString() ?? "No reason provided",
+                ConfidenceScore = root.TryGetProperty("confidence", out var conf) ? conf.GetDouble() : 0.8,
+                DetectedCategories = [.. detectedCategories]
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to parse Gemini Vision API response: {Response}", apiResponse);
+            return new ImageModerationResult
+            {
+                IsApproved = true,
+                Reason = "Could not parse AI response - auto-approved for manual review",
+                ConfidenceScore = 0.0,
+                DetectedCategories = []
+            };
+        }
+    }
+
+    private static string CleanJsonResponse(string response)
+    {
+        var text = response.Trim();
+
+        if (text.StartsWith("```json"))
+            text = text[7..];
+        else if (text.StartsWith("```"))
+            text = text[3..];
+
+        if (text.EndsWith("```"))
+            text = text[..^3];
+
+        return text.Trim();
     }
 }

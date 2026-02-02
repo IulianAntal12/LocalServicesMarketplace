@@ -18,6 +18,7 @@ export interface ServiceDto {
 }
 
 export interface PortfolioImageDto {
+  description: string;
   id: number;
   imageUrl: string;
   caption?: string;

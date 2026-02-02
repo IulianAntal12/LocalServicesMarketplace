@@ -12,6 +12,7 @@ public class UploadImageHandler(
     ApplicationDbContext context,
     IMongoStorageService mongoStorage,
     ICurrentUserService currentUser,
+    IGeminiService geminiService,
     ILogger<UploadImageHandler> logger)
     : IRequestHandler<UploadImageCommand, Result<UploadImageResponse>>
 {
@@ -30,13 +31,45 @@ public class UploadImageHandler(
         if (currentImageCount >= MaxImagesPerProvider)
             return Result<UploadImageResponse>.BadRequest($"Maximum {MaxImagesPerProvider} images allowed!");
 
-        // Validate image
+        // Validate image format
         if (!mongoStorage.ValidateImage(request.File))
             return Result<UploadImageResponse>.BadRequest("Invalid image file. Max 5MB, jpg/png/webp only!");
 
         try
         {
-            // Upload to MongoDB GridFS
+            // Get provider's main service category for context
+            var providerCategory = await GetProviderMainCategoryAsync(currentUser.UserId!, ct);
+
+            // Read image bytes for AI moderation
+            byte[] imageBytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                await request.File.CopyToAsync(memoryStream, ct);
+                imageBytes = memoryStream.ToArray();
+            }
+
+            // AI Image Moderation
+            var moderationResult = await geminiService.ModerateImageAsync(
+                imageBytes,
+                request.File.ContentType ?? "image/jpeg",
+                providerCategory,
+                ct);
+
+            logger.LogInformation(
+                "AI Image Moderation result for provider {ProviderId}: Approved={IsApproved}, Reason={Reason}, Categories={Categories}",
+                currentUser.UserId,
+                moderationResult.IsApproved,
+                moderationResult.Reason,
+                string.Join(", ", moderationResult.DetectedCategories));
+
+            // Reject if AI moderation fails
+            if (!moderationResult.IsApproved)
+            {
+                return Result<UploadImageResponse>.BadRequest(
+                    $"Image rejected: {moderationResult.Reason}");
+            }
+
+            // Upload to MongoDB GridFS (only if approved)
             var mongoFileId = await mongoStorage.UploadImageAsync(request.File, currentUser.UserId!);
 
             logger.LogInformation("Image uploaded to MongoDB. FileId: {FileId}, Provider: {ProviderId}",
@@ -59,7 +92,7 @@ public class UploadImageHandler(
             return Result<UploadImageResponse>.Success(new UploadImageResponse
             {
                 ImageId = portfolioImage.Id,
-                ImageUrl = $"/api/images/{mongoFileId}", // New URL format
+                ImageUrl = $"/api/images/{mongoFileId}",
                 FileName = portfolioImage.FileName
             }, HttpStatusCode.Created);
         }
@@ -70,5 +103,18 @@ public class UploadImageHandler(
                 HttpStatusCode.InternalServerError,
                 "Failed to upload image.");
         }
+    }
+
+    private async Task<string> GetProviderMainCategoryAsync(string providerId, CancellationToken ct)
+    {
+        // Get the most common category from provider's services
+        var category = await context.Set<Service>()
+            .Where(s => s.ProviderId == providerId && s.IsActive)
+            .GroupBy(s => s.Category)
+            .OrderByDescending(g => g.Count())
+            .Select(g => g.Key)
+            .FirstOrDefaultAsync(ct);
+
+        return category ?? "Home Services"; // Default if no services yet
     }
 }
