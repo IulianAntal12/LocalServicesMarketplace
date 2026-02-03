@@ -96,7 +96,7 @@ const testimonials = [
     quote:
       "Bookings come in constantly and I can manage my time myself. The best part is I don't have to advertise anymore.",
     author: "Maria P.",
-    role: "Interior Designer, Cluj",
+    role: "Painter, Cluj",
     rating: 5,
   },
 ];

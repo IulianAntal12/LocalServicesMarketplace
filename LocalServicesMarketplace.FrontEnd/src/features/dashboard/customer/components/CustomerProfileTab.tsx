@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { User, MapPin, Loader2 } from "lucide-react";
 import { useAuth } from "../../../../context";
-import { Button } from "../../../../components/common/Button";
 import { bookingService } from "../../../../services/bookingService";
 import { reviewService } from "../../../../services/reviewService";
-import toast from "react-hot-toast";
 import styles from "./CustomerProfileTab.module.css";
 
 export function CustomerProfileTab() {
@@ -31,7 +29,7 @@ export function CustomerProfileTab() {
 
         // Calculate unique providers contacted (from bookings)
         const uniqueProviders = new Set(
-          bookingsResponse.bookings.map((b) => b.providerName)
+          bookingsResponse.bookings.map((b) => b.providerName),
         );
 
         setStats({
@@ -125,19 +123,6 @@ export function CustomerProfileTab() {
               </span>
               <span className={styles.statLabel}>Providers Contacted</span>
             </div>
-          </div>
-        </div>
-
-        {/* Account Actions */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Account Actions</h3>
-          <div className={styles.actionsGrid}>
-            <Button variant="outline" onClick={() => toast("Coming soon!")}>
-              Change Password
-            </Button>
-            <Button variant="outline" onClick={() => toast("Coming soon!")}>
-              Notification Settings
-            </Button>
           </div>
         </div>
       </div>

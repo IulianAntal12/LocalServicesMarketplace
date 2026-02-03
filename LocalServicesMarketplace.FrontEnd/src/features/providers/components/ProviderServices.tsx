@@ -27,7 +27,7 @@ export function ProviderServices({
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [selectedService, setSelectedService] = useState<ServiceDto | null>(
-    null
+    null,
   );
   const [showBookingModal, setShowBookingModal] = useState(false);
 
@@ -100,7 +100,7 @@ export function ProviderServices({
                   {PRICE_TYPE_LABELS[service.priceType] || service.priceType}
                 </span>
                 <Button size="sm" onClick={() => handleBookService(service)}>
-                  Programează
+                  Book
                 </Button>
               </div>
             </div>

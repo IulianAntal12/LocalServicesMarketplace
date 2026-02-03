@@ -30,8 +30,8 @@ const tabs: Tab[] = [
   { id: "profile", label: "Profile", icon: User },
   { id: "services", label: "Services", icon: Briefcase },
   { id: "portfolio", label: "Portfolio", icon: Image },
-  { id: "bookings", label: "Programări", icon: Calendar },
-  { id: "notifications", label: "Notificări", icon: Bell },
+  { id: "bookings", label: "Bookings", icon: Calendar },
+  { id: "notifications", label: "Notifications", icon: Bell },
 ];
 
 export function ProviderDashboard() {

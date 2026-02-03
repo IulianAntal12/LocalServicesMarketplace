@@ -178,7 +178,7 @@ export function HowItWorksPage() {
                 Search services
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="lg"
                 onClick={() => navigate("/become-provider")}
               >
