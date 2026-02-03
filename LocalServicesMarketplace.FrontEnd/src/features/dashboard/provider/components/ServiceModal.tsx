@@ -255,15 +255,16 @@ export function ServiceModal({
 
           <div className={styles.formGroup}>
             <label htmlFor="basePrice" className={styles.label}>
-              Base Price (RON)
+              Base Price (RON) <span className={styles.required}>*</span>
             </label>
             <Input
+              required
               id="basePrice"
               name="basePrice"
               type="number"
-              min="0"
-              step="0.01"
-              value={formData.basePrice}
+              min="1"
+              step="1"
+              value={formData.basePrice || ""}
               onChange={handleChange}
               placeholder="0.00"
               disabled={formData.priceType === "Quote"}
@@ -274,18 +275,19 @@ export function ServiceModal({
         {/* Estimated Duration */}
         <div className={styles.formGroup}>
           <label htmlFor="estimatedDurationMinutes" className={styles.label}>
-            Estimated Duration (minutes)
+            Estimated Duration (minutes){" "}
+            <span className={styles.required}>*</span>
           </label>
           <Input
+            required
             id="estimatedDurationMinutes"
             name="estimatedDurationMinutes"
             type="number"
             min="1"
             max="480"
-            value={formData.estimatedDurationMinutes}
+            value={formData.estimatedDurationMinutes || ""}
             onChange={handleChange}
             placeholder="60"
-            disabled={isEditing}
           />
           <span className={styles.fieldHint}>
             Between 1 and 480 minutes (8 hours)
@@ -301,7 +303,9 @@ export function ServiceModal({
             {loading ? (
               <>
                 <Loader2 size={18} className={styles.spinner} />
-                {isEditing ? "Updating..." : "Creating..."}
+                {isEditing
+                  ? "Updating and Analyzing..."
+                  : "Creating and Analyzing..."}
               </>
             ) : isEditing ? (
               "Update Service"

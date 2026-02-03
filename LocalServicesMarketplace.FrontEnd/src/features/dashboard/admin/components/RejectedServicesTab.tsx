@@ -3,7 +3,6 @@ import {
   XCircle,
   Loader2,
   Eye,
-  Check,
   ChevronLeft,
   ChevronRight,
   Briefcase,
@@ -237,7 +236,10 @@ export function RejectedServicesTab() {
                   </div>
                 </div>
 
-                <div className={styles.serviceActions}>
+                <div
+                  className={styles.serviceActions}
+                  style={{ alignSelf: "center" }}
+                >
                   <Button
                     variant="outline"
                     size="sm"
@@ -246,16 +248,6 @@ export function RejectedServicesTab() {
                     <Eye size={16} />
                     Review
                   </Button>
-                  {service.moderationStatus === "AiRejected" && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleViewService(service)}
-                    >
-                      <Check size={16} />
-                      Override
-                    </Button>
-                  )}
                 </div>
               </div>
             ))}

@@ -55,7 +55,7 @@ export function BookingsTab() {
   const [stats, setStats] = useState<BookingStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<BookingStatus | "all">(
-    "all"
+    "all",
   );
   const [selectedBooking, setSelectedBooking] = useState<number | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
@@ -318,9 +318,6 @@ export function BookingsTab() {
               <div key={booking.id} className={styles.bookingCard}>
                 <div className={styles.bookingHeader}>
                   <div className={styles.customerInfo}>
-                    <div className={styles.customerAvatar}>
-                      {booking.customerName.charAt(0).toUpperCase()}
-                    </div>
                     <div>
                       <h4 className={styles.customerName}>
                         {booking.customerName}
