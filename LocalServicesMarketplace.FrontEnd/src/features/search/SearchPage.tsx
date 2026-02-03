@@ -43,7 +43,7 @@ export function SearchPage() {
 
   // Get all cities
   const allCities = countries.flatMap((county) =>
-    county.cities.map((city) => city.name)
+    county.cities.map((city) => city.name),
   );
   const uniqueCities = [...new Set(allCities)].sort();
 
@@ -86,7 +86,7 @@ export function SearchPage() {
       result = result.filter(
         (p) =>
           p.businessName.toLowerCase().includes(query) ||
-          p.businessDescription?.toLowerCase().includes(query)
+          p.businessDescription?.toLowerCase().includes(query),
       );
     }
 
@@ -96,21 +96,24 @@ export function SearchPage() {
       result = result.filter(
         (p) =>
           p.businessDescription?.toLowerCase().includes(cat) ||
-          p.businessName.toLowerCase().includes(cat)
+          p.businessName.toLowerCase().includes(cat),
       );
     }
 
     // Filter by city
     if (filters.city) {
       result = result.filter(
-        (p) => p.city?.toLowerCase() === filters.city.toLowerCase()
+        (p) => p.city?.toLowerCase() === filters.city.toLowerCase(),
       );
     }
 
     // Filter by minimum rating
     if (filters.minRating !== null) {
       result = result.filter(
-        (p) => p.rating !== null && p.rating >= filters.minRating!
+        (p) =>
+          p.rating !== null &&
+          p.rating !== undefined &&
+          p.rating >= filters.minRating!,
       );
     }
 
@@ -121,7 +124,7 @@ export function SearchPage() {
           if (a.rating === null && b.rating === null) return 0;
           if (a.rating === null) return 1;
           if (b.rating === null) return -1;
-          return b.rating - a.rating;
+          return (b.rating ?? 0) - (a.rating ?? 0);
         case "reviews":
           return b.totalReviews - a.totalReviews;
         case "name":
@@ -163,9 +166,9 @@ export function SearchPage() {
 
   const hasActiveFilters = Boolean(
     filters.category ||
-      filters.city ||
-      filters.minRating !== null ||
-      searchQuery
+    filters.city ||
+    filters.minRating !== null ||
+    searchQuery,
   );
 
   return (

@@ -38,11 +38,11 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
       value: city.name,
       label: city.name,
       group: county.name,
-    }))
+    })),
   );
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -304,8 +304,8 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
             <span className={styles.infoValue}>{profile.email}</span>
           </div>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Full Name</span>
-            <span className={styles.infoValue}>{profile.fullName}</span>
+            <span className={styles.infoLabel}>Business Name</span>
+            <span className={styles.infoValue}>{profile.businessName}</span>
           </div>
           {profile.phoneNumber && (
             <div className={styles.infoRow}>

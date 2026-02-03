@@ -50,7 +50,7 @@ export function ProviderCard({ provider, onClick }: ProviderCardProps) {
 
       <div className={styles.cardFooter}>
         <div className={styles.rating}>
-          {provider.rating !== null ? (
+          {provider.rating !== null && provider.rating !== undefined ? (
             <>
               <Star size={16} fill="#f59e0b" color="#f59e0b" />
               <span className={styles.ratingValue}>

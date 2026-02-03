@@ -27,6 +27,8 @@ export interface PortfolioImageDto {
 }
 
 export interface ProviderProfile {
+  profilePictureUrl: string | undefined;
+  fullName: string | undefined;
   id: string;
   email: string;
   businessName?: string;

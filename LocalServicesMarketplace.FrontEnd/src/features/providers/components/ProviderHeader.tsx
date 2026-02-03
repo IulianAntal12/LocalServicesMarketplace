@@ -25,7 +25,7 @@ export function ProviderHeader({ provider }: ProviderHeaderProps) {
   const [showContactInfo, setShowContactInfo] = useState(false);
 
   const activeServicesCount = provider.services.filter(
-    (s) => s.isActive
+    (s) => s.isActive,
   ).length;
 
   const handleContactClick = () => {

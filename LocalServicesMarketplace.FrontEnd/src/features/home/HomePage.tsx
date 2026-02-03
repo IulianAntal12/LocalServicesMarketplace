@@ -75,7 +75,7 @@ export function HomePage() {
       name: city.name,
       county: county.name,
       fullName: `${city.name}, ${county.name}`,
-    }))
+    })),
   );
 
   // Fetch categories
@@ -107,8 +107,8 @@ export function HomePage() {
           .sort((a, b) => {
             if (a.rating === null && b.rating === null)
               return b.totalReviews - a.totalReviews;
-            if (a.rating === null) return 1;
-            if (b.rating === null) return -1;
+            if (a.rating === null || a.rating === undefined) return 1;
+            if (b.rating === null || b.rating === undefined) return -1;
             if (b.rating !== a.rating) return b.rating - a.rating;
             return b.totalReviews - a.totalReviews;
           })
@@ -302,7 +302,8 @@ export function HomePage() {
                       </p>
                     )}
                     <div className={styles.providerMeta}>
-                      {provider.rating !== null ? (
+                      {provider.rating !== null &&
+                      provider.rating !== undefined ? (
                         <span className={styles.providerRating}>
                           <Star size={14} fill="currentColor" />
                           {provider.rating.toFixed(1)}

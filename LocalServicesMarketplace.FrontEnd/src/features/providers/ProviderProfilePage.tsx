@@ -134,7 +134,7 @@ export function ProviderProfilePage() {
           <ProviderServices
             services={activeServices}
             providerId={provider.id}
-            providerName={provider.businessName || provider.fullName}
+            providerName={provider.businessName || provider.fullName || ""}
           />
         )}
         {activeTab === "portfolio" && (
@@ -143,7 +143,7 @@ export function ProviderProfilePage() {
         {activeTab === "reviews" && (
           <ProviderReviews
             providerId={provider.id}
-            providerName={provider.businessName || provider.fullName}
+            providerName={provider.businessName || provider.fullName || ""}
             services={provider.services}
             onReviewChange={handleReviewChange}
           />
