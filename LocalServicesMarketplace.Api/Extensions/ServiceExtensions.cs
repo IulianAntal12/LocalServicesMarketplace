@@ -33,11 +33,23 @@ public static class ServiceExtensions
     }
 
     private static IServiceCollection AddDatabase(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    this IServiceCollection services,
+    IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sqlServerOptions =>
+                {
+                    // Enable retry on failure for Azure SQL transient errors
+                    sqlServerOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+
+                    // Command timeout for slow Azure SQL wake-up
+                    sqlServerOptions.CommandTimeout(60);
+                }));
 
         return services;
     }
