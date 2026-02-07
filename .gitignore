@@ -416,3 +416,20 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Environment files with secrets
+.env
+.env.local
+.env.production.local
+*.env.local
+
+# Keep example/template files
+!.env.example
+!LocalServicesMarketplace.FrontEnd/.env.example
+
+# Railway
+.railway/
+
+# Build outputs
+out/
+publish/
