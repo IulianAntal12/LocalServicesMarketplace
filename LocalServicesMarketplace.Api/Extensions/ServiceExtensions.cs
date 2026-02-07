@@ -203,7 +203,11 @@ public static class ServiceExtensions
         {
             options.AddPolicy("AllowReactApp", policy =>
             {
-                policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+                var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")
+                    ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    ?? ["http://localhost:3000", "http://localhost:5173"];
+
+                policy.WithOrigins(allowedOrigins)
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();

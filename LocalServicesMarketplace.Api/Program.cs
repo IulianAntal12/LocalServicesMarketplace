@@ -14,20 +14,22 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Swagger - disponibil în toate environment-urile
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Local Services Marketplace API V1");
+    c.RoutePrefix = "swagger";
+    c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+    c.DefaultModelsExpandDepth(0);
+});
+
+// Railway handles SSL termination, so skip HTTPS redirect in production
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Local Services Marketplace API V1");
-        c.RoutePrefix = string.Empty;
-        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
-        c.DefaultModelsExpandDepth(0);
-    });
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 
 // Output cache for MongoDB images

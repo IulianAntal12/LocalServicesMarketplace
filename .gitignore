@@ -433,3 +433,5 @@ FodyWeavers.xsd
 # Build outputs
 out/
 publish/
+/LocalServicesMarketplace.Api/appsettings.Development.json
+/LocalServicesMarketplace.Api/appsettings.Development.json
