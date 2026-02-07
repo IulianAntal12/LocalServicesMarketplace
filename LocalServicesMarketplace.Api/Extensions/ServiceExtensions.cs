@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 namespace LocalServicesMarketplace.Api.Extensions;
@@ -164,9 +165,22 @@ public static class ServiceExtensions
                 Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
             });
 
-            options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        },
+                        Scheme = "Bearer",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header
+                    },
+                    new List<string>()
+                }
             });
         });
 

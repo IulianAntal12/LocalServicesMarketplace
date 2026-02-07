@@ -1,11 +1,12 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS"
+    "builder": "NIXPACKS",
+    "buildCommand": "dotnet publish LocalServicesMarketplace.Api/LocalServicesMarketplace.Api.csproj -c Release -o out"
   },
   "deploy": {
-    "startCommand": "dotnet LocalServicesMarketplace.Api.dll",
-    "healthcheckPath": "/health",
-    "healthcheckTimeout": 100
+    "startCommand": "dotnet out/LocalServicesMarketplace.Api.dll",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
   }
 }
