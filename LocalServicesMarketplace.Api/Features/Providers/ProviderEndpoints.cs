@@ -218,7 +218,20 @@ public class ProviderEndpoints : IEndpoint
         service.Name = request.Name ?? service.Name;
         service.Description = request.Description ?? service.Description;
         service.BasePrice = request.BasePrice ?? service.BasePrice;
+        service.PriceType = request.PriceType ?? service.PriceType;
+        service.EstimatedDurationMinutes = request.EstimatedDurationMinutes ?? service.EstimatedDurationMinutes;
         service.UpdatedAt = DateTime.UtcNow;
+
+        // Update IsActive if provided (only if service is approved)
+        if (request.IsActive.HasValue)
+        {
+            // Only allow activating if service is approved
+            if (request.IsActive.Value && service.ModerationStatus != ModerationStatus.Approved)
+            {
+                return Results.BadRequest("Cannot activate a service that is not approved.");
+            }
+            service.IsActive = request.IsActive.Value;
+        }
 
         // Always re-run AI moderation when name or description changes
         if (nameChanged || descriptionChanged)
@@ -247,7 +260,7 @@ public class ProviderEndpoints : IEndpoint
             service.ModerationReason = moderationResult.Reason;
             service.ModeratedAt = DateTime.UtcNow;
             service.ModeratedBy = null; // null indicates AI moderation
-            service.IsActive = moderationResult.IsApproved;
+            service.IsActive = moderationResult.IsApproved && (request.IsActive ?? service.IsActive);
 
             // Create moderation log
             var moderationLog = new ModerationLog
@@ -272,7 +285,8 @@ public class ProviderEndpoints : IEndpoint
                 ServiceId = service.Id,
                 Message = message,
                 ModerationStatus = service.ModerationStatus.ToString(),
-                ModerationReason = moderationResult.IsApproved ? null : moderationResult.Reason
+                ModerationReason = moderationResult.IsApproved ? null : moderationResult.Reason,
+                IsActive = service.IsActive
             });
         }
 
@@ -284,7 +298,8 @@ public class ProviderEndpoints : IEndpoint
             ServiceId = service.Id,
             Message = "Service updated successfully!",
             ModerationStatus = service.ModerationStatus.ToString(),
-            ModerationReason = null
+            ModerationReason = null,
+            IsActive = service.IsActive
         });
     }
 
@@ -326,6 +341,9 @@ public class UpdateServiceRequest
     public string? Name { get; set; }
     public string? Description { get; set; }
     public decimal? BasePrice { get; set; }
+    public string? PriceType { get; set; }
+    public int? EstimatedDurationMinutes { get; set; }
+    public bool? IsActive { get; set; }
 }
 
 public class UpdateServiceResponse
@@ -334,4 +352,5 @@ public class UpdateServiceResponse
     public required string Message { get; set; }
     public string? ModerationStatus { get; set; }
     public string? ModerationReason { get; set; }
+    public bool IsActive { get; set; }
 }

@@ -94,6 +94,7 @@ export interface UpdateServiceRequest {
   basePrice?: number;
   priceType?: string;
   estimatedDurationMinutes?: number;
+  isActive?: boolean;
 }
 
 export interface CreateServiceResponse {
@@ -108,6 +109,7 @@ export interface UpdateServiceResponse {
   message: string;
   moderationStatus?: string;
   moderationReason?: string;
+  isActive?: boolean;
 }
 
 export interface SearchProvidersParams {
@@ -132,7 +134,7 @@ export const providerService = {
 
   // Search providers
   search: async (
-    params: SearchProvidersParams,
+    params: SearchProvidersParams
   ): Promise<ProviderListItem[]> => {
     const response = await api.get<ProviderListItem[]>("/providers/search", {
       params,
@@ -143,7 +145,7 @@ export const providerService = {
   // Get provider's services (public)
   getProviderServices: async (providerId: string): Promise<ServiceDto[]> => {
     const response = await api.get<ServiceDto[]>(
-      `/providers/${providerId}/services`,
+      `/providers/${providerId}/services`
     );
     return response.data;
   },
@@ -163,11 +165,11 @@ export const providerService = {
   // SERVICES CRUD
   // Create service
   createService: async (
-    data: CreateServiceRequest,
+    data: CreateServiceRequest
   ): Promise<CreateServiceResponse> => {
     const response = await api.post<CreateServiceResponse>(
       "/providers/services",
-      data,
+      data
     );
     return response.data;
   },
@@ -175,11 +177,11 @@ export const providerService = {
   // Update service
   updateService: async (
     serviceId: number,
-    data: UpdateServiceRequest,
+    data: UpdateServiceRequest
   ): Promise<UpdateServiceResponse> => {
     const response = await api.put<UpdateServiceResponse>(
       `/providers/services/${serviceId}`,
-      data,
+      data
     );
     return response.data;
   },

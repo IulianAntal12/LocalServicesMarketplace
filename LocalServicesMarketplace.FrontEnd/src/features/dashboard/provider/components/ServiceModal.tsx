@@ -43,7 +43,7 @@ export function ServiceModal({
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] =
     useState<CreateServiceRequest>(initialFormData);
-  const [, setIsActive] = useState(true);
+  const [isActive, setIsActive] = useState(true);
 
   const isEditing = !!service;
 
@@ -86,7 +86,7 @@ export function ServiceModal({
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -126,15 +126,16 @@ export function ServiceModal({
           basePrice: formData.basePrice,
           priceType: formData.priceType,
           estimatedDurationMinutes: formData.estimatedDurationMinutes,
+          isActive: isActive,
         });
 
         if (response.moderationStatus === "AiRejected") {
           toast.error(
             "Service updated but flagged for review: " +
-              response.moderationReason,
+              response.moderationReason
           );
         } else {
-          toast.success("Service updated and approved!");
+          toast.success("Service updated successfully!");
         }
       } else {
         // CREATE
@@ -143,7 +144,7 @@ export function ServiceModal({
         if (response.moderationStatus === "AiRejected") {
           toast.error(
             "Service created but flagged for review: " +
-              response.moderationReason,
+              response.moderationReason
           );
         } else {
           toast.success("Service created successfully!");
@@ -153,13 +154,16 @@ export function ServiceModal({
       onSuccess();
     } catch (err) {
       toast.error(
-        isEditing ? "Failed to update service" : "Failed to create service",
+        isEditing ? "Failed to update service" : "Failed to create service"
       );
       console.error("Error saving service:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  // Check if service can be activated (must be approved)
+  const canToggleActive = !isEditing || service?.moderationStatus === "Approved";
 
   return (
     <Modal
@@ -221,9 +225,9 @@ export function ServiceModal({
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Describe what this service includes..."
+            placeholder="Describe your service in detail..."
             className={styles.textarea}
-            rows={3}
+            rows={4}
             maxLength={500}
           />
           <span className={styles.charCount}>
@@ -231,8 +235,24 @@ export function ServiceModal({
           </span>
         </div>
 
-        {/* Price Type & Base Price */}
+        {/* Price & Duration Row */}
         <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label htmlFor="basePrice" className={styles.label}>
+              Base Price (RON)
+            </label>
+            <Input
+              id="basePrice"
+              name="basePrice"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.basePrice || ""}
+              onChange={handleChange}
+              placeholder="e.g., 100"
+            />
+          </div>
+
           <div className={styles.formGroup}>
             <label htmlFor="priceType" className={styles.label}>
               Price Type
@@ -243,7 +263,6 @@ export function ServiceModal({
               value={formData.priceType}
               onChange={handleChange}
               className={styles.select}
-              disabled={isEditing}
             >
               {PRICE_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -252,47 +271,50 @@ export function ServiceModal({
               ))}
             </select>
           </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="basePrice" className={styles.label}>
-              Base Price (RON) <span className={styles.required}>*</span>
-            </label>
-            <Input
-              required
-              id="basePrice"
-              name="basePrice"
-              type="number"
-              min="1"
-              step="1"
-              value={formData.basePrice || ""}
-              onChange={handleChange}
-              placeholder="0.00"
-              disabled={formData.priceType === "Quote"}
-            />
-          </div>
         </div>
 
         {/* Estimated Duration */}
         <div className={styles.formGroup}>
           <label htmlFor="estimatedDurationMinutes" className={styles.label}>
-            Estimated Duration (minutes){" "}
-            <span className={styles.required}>*</span>
+            Estimated Duration (minutes)
           </label>
           <Input
-            required
             id="estimatedDurationMinutes"
             name="estimatedDurationMinutes"
             type="number"
-            min="1"
-            max="480"
+            min="15"
+            step="15"
             value={formData.estimatedDurationMinutes || ""}
             onChange={handleChange}
-            placeholder="60"
+            placeholder="e.g., 60"
           />
-          <span className={styles.fieldHint}>
-            Between 1 and 480 minutes (8 hours)
-          </span>
         </div>
+
+        {/* Is Active Checkbox - Only show when editing */}
+        {isEditing && (
+          <div className={styles.formGroup}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+                className={styles.checkbox}
+                disabled={!canToggleActive}
+              />
+              <span>Service is active and visible to customers</span>
+            </label>
+            {!canToggleActive && (
+              <span className={styles.fieldHint}>
+                Service must be approved before it can be activated
+              </span>
+            )}
+            {service?.moderationStatus === "AiRejected" && (
+              <span className={styles.warningHint}>
+                ⚠️ This service was rejected: {service.moderationReason}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Actions */}
         <div className={styles.actions}>

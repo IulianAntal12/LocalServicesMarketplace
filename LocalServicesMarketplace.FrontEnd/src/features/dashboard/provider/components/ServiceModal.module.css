@@ -36,7 +36,9 @@
   color: var(--color-text);
   background: var(--color-surface);
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -66,7 +68,9 @@
   color: var(--color-text);
   background: var(--color-surface);
   resize: vertical;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .textarea:focus {
@@ -117,6 +121,17 @@
 
 .spinner {
   animation: spin 1s linear infinite;
+}
+
+/* Warning hint for rejected services */
+.warningHint {
+  font-size: 0.75rem;
+  color: var(--color-warning, #f59e0b);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border-left: 3px solid var(--color-warning, #f59e0b);
+  margin-top: 0.5rem;
 }
 
 @keyframes spin {
