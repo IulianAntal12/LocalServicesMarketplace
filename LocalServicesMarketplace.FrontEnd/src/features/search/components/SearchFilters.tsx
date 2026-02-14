@@ -1,7 +1,7 @@
 import { Star } from "lucide-react";
 import type { Category } from "../../../services/categoryService";
 import type { FilterState } from "../SearchPage";
-import { Button, SearchableSelect } from "../../../components/common";
+import { Button, SearchableSelect, Input } from "../../../components/common";
 import styles from "./SearchFilters.module.css";
 
 interface SearchFiltersProps {
@@ -22,6 +22,7 @@ const ratingOptions = [
 
 const sortOptions = [
   { value: "rating", label: "Highest Rated" },
+  { value: "distance", label: "Nearest First" },
   { value: "reviews", label: "Most Reviews" },
   { value: "name", label: "Name (A-Z)" },
 ];
@@ -51,6 +52,21 @@ export function SearchFilters({
     value: opt.value,
     label: opt.label,
   }));
+
+  // Handle radius change - only allow positive integers
+  const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Allow empty string (to clear) or positive integers
+    if (value === "") {
+      onFilterChange({ radius: null });
+    } else {
+      const numValue = parseInt(value, 10);
+      if (!isNaN(numValue) && numValue > 0 && numValue <= 500) {
+        onFilterChange({ radius: numValue });
+      }
+    }
+  };
 
   return (
     <div className={styles.filters}>
@@ -89,6 +105,30 @@ export function SearchFilters({
         />
       </div>
 
+      {/* Radius Filter - only show when city is selected */}
+      {filters.city && (
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>
+            Search Radius (km)
+          </label>
+          <div className={styles.radiusInput}>
+            <Input
+              type="number"
+              min="1"
+              max="500"
+              placeholder="e.g. 50"
+              value={filters.radius ?? ""}
+              onChange={handleRadiusChange}
+            />
+            <span className={styles.radiusHint}>
+              {filters.radius 
+                ? `Searching within ${filters.radius} km of ${filters.city}`
+                : "Leave empty for exact city match"}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Rating Filter */}
       <div className={styles.filterGroup}>
         <label className={styles.filterLabel}>Minimum Rating</label>
@@ -120,11 +160,9 @@ export function SearchFilters({
 
       {/* Clear Filters */}
       {hasActiveFilters && (
-        <div className={styles.clearFilters}>
-          <Button variant="outline" fullWidth onClick={onClearFilters}>
-            Clear All Filters
-          </Button>
-        </div>
+        <Button variant="outline" onClick={onClearFilters} fullWidth>
+          Clear All Filters
+        </Button>
       )}
     </div>
   );

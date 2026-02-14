@@ -1,22 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search, MapPin, SlidersHorizontal, X, Loader2 } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  SlidersHorizontal,
+  X,
+  Loader2,
+  Navigation,
+} from "lucide-react";
 import {
   providerService,
   type ProviderListItem,
 } from "../../services/providerService";
+import { searchService } from "../../services/searchService";
 import { categoryService, type Category } from "../../services/categoryService";
 import { SearchFilters } from "./components/SearchFilters";
 import { ProviderCard } from "./components/ProviderCard";
 import { Button } from "../../components/common";
-import { countries } from "../../data/romania-locations";
+import { countries, findCity } from "../../data/romania-locations";
 import styles from "./SearchPage.module.css";
 
 export interface FilterState {
   category: string;
   city: string;
+  radius: number | null;
   minRating: number | null;
-  sortBy: "rating" | "reviews" | "name";
+  sortBy: "rating" | "distance" | "reviews" | "name";
 }
 
 export function SearchPage() {
@@ -26,9 +35,6 @@ export function SearchPage() {
   // Search states
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [providers, setProviders] = useState<ProviderListItem[]>([]);
-  const [filteredProviders, setFilteredProviders] = useState<
-    ProviderListItem[]
-  >([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -37,11 +43,14 @@ export function SearchPage() {
   const [filters, setFilters] = useState<FilterState>({
     category: searchParams.get("category") || "",
     city: searchParams.get("city") || "",
+    radius: searchParams.get("radius")
+      ? parseInt(searchParams.get("radius")!, 10)
+      : null,
     minRating: null,
     sortBy: "rating",
   });
 
-  // Get all cities
+  // Get all unique cities for the filter dropdown
   const allCities = countries.flatMap((county) =>
     county.cities.map((city) => city.name),
   );
@@ -60,82 +69,123 @@ export function SearchPage() {
     fetchCategories();
   }, []);
 
-  // Fetch providers
-  useEffect(() => {
-    const fetchProviders = async () => {
-      try {
-        setLoading(true);
+  // Fetch providers with filters
+  const fetchProviders = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      // Get city coordinates if city is selected
+      let lat: number | undefined;
+      let lng: number | undefined;
+
+      if (filters.city) {
+        const cityData = findCity(filters.city);
+        if (cityData) {
+          lat = cityData.city.lat;
+          lng = cityData.city.lng;
+        }
+      }
+
+      // Use search service if we have location-based search, otherwise get all
+      if (lat && lng && filters.radius) {
+        // Use backend search with Haversine distance calculation
+        const response = await searchService.searchProviders({
+          q: searchQuery || undefined,
+          category: filters.category || undefined,
+          lat,
+          lng,
+          radius: filters.radius,
+          minRating: filters.minRating ?? undefined,
+          sortBy: filters.sortBy === "name" ? "rating" : filters.sortBy,
+          page: 1,
+          pageSize: 100,
+        });
+
+        // Map response to ProviderListItem format
+        const mappedProviders: ProviderListItem[] = response.providers.map(
+          (p) => ({
+            id: p.id,
+            fullName: p.fullName,
+            businessName: p.businessName,
+            businessDescription: p.businessDescription ?? null,
+            rating: p.rating ?? null,
+            totalReviews: p.totalReviews,
+            city: p.city ?? null,
+            profilePictureUrl: p.profilePictureUrl ?? null,
+            distanceKm: p.distanceKm ?? null,
+          }),
+        );
+
+        setProviders(mappedProviders);
+      } else {
+        // Get all providers and filter locally
         const data = await providerService.getAll();
-        setProviders(data);
-      } catch (err) {
-        console.error("Error fetching providers:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProviders();
-  }, []);
+        let result = [...data];
 
-  // Apply filters and search
+        // Filter by search query
+        if (searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          result = result.filter(
+            (p) =>
+              p.businessName.toLowerCase().includes(query) ||
+              p.businessDescription?.toLowerCase().includes(query),
+          );
+        }
+
+        // Filter by category
+        if (filters.category) {
+          const cat = filters.category.toLowerCase();
+          result = result.filter(
+            (p) =>
+              p.businessDescription?.toLowerCase().includes(cat) ||
+              p.businessName.toLowerCase().includes(cat),
+          );
+        }
+
+        // Filter by exact city (when no radius)
+        if (filters.city && !filters.radius) {
+          result = result.filter(
+            (p) => p.city?.toLowerCase() === filters.city.toLowerCase(),
+          );
+        }
+
+        // Filter by minimum rating
+        if (filters.minRating !== null) {
+          result = result.filter(
+            (p) => p.rating != null && p.rating >= filters.minRating!,
+          );
+        }
+
+        // Sort locally
+        result.sort((a, b) => {
+          switch (filters.sortBy) {
+            case "rating":
+              if (a.rating === null && b.rating === null) return 0;
+              if (a.rating === null) return 1;
+              if (b.rating === null) return -1;
+              return (b.rating ?? 0) - (a.rating ?? 0);
+            case "reviews":
+              return b.totalReviews - a.totalReviews;
+            case "name":
+              return a.businessName.localeCompare(b.businessName);
+            default:
+              return 0;
+          }
+        });
+
+        setProviders(result);
+      }
+    } catch (err) {
+      console.error("Error fetching providers:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchQuery, filters]);
+
+  // Fetch providers when filters change
   useEffect(() => {
-    let result = [...providers];
-
-    // Filter by search query (business name or description)
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.businessName.toLowerCase().includes(query) ||
-          p.businessDescription?.toLowerCase().includes(query),
-      );
-    }
-
-    // Filter by category - check if provider has services in that category
-    if (filters.category) {
-      const cat = filters.category.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.businessDescription?.toLowerCase().includes(cat) ||
-          p.businessName.toLowerCase().includes(cat),
-      );
-    }
-
-    // Filter by city
-    if (filters.city) {
-      result = result.filter(
-        (p) => p.city?.toLowerCase() === filters.city.toLowerCase(),
-      );
-    }
-
-    // Filter by minimum rating
-    if (filters.minRating !== null) {
-      result = result.filter(
-        (p) =>
-          p.rating !== null &&
-          p.rating !== undefined &&
-          p.rating >= filters.minRating!,
-      );
-    }
-
-    // Sort
-    result.sort((a, b) => {
-      switch (filters.sortBy) {
-        case "rating":
-          if (a.rating === null && b.rating === null) return 0;
-          if (a.rating === null) return 1;
-          if (b.rating === null) return -1;
-          return (b.rating ?? 0) - (a.rating ?? 0);
-        case "reviews":
-          return b.totalReviews - a.totalReviews;
-        case "name":
-          return a.businessName.localeCompare(b.businessName);
-        default:
-          return 0;
-      }
-    });
-
-    setFilteredProviders(result);
-  }, [providers, searchQuery, filters]);
+    fetchProviders();
+  }, [fetchProviders]);
 
   // Update URL params when filters change
   useEffect(() => {
@@ -143,21 +193,38 @@ export function SearchPage() {
     if (searchQuery) params.set("q", searchQuery);
     if (filters.category) params.set("category", filters.category);
     if (filters.city) params.set("city", filters.city);
+    if (filters.radius) params.set("radius", filters.radius.toString());
     setSearchParams(params, { replace: true });
-  }, [searchQuery, filters.category, filters.city, setSearchParams]);
+  }, [
+    searchQuery,
+    filters.category,
+    filters.city,
+    filters.radius,
+    setSearchParams,
+  ]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
   const handleFilterChange = (newFilters: Partial<FilterState>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setFilters((prev) => {
+      const updated = { ...prev, ...newFilters };
+
+      // If city is cleared, also clear radius
+      if (newFilters.city === "") {
+        updated.radius = null;
+      }
+
+      return updated;
+    });
   };
 
   const handleClearFilters = () => {
     setFilters({
       category: "",
       city: "",
+      radius: null,
       minRating: null,
       sortBy: "rating",
     });
@@ -167,6 +234,7 @@ export function SearchPage() {
   const hasActiveFilters = Boolean(
     filters.category ||
     filters.city ||
+    filters.radius ||
     filters.minRating !== null ||
     searchQuery,
   );
@@ -256,9 +324,8 @@ export function SearchPage() {
                 "Loading..."
               ) : (
                 <>
-                  <strong>{filteredProviders.length}</strong>{" "}
-                  {filteredProviders.length === 1 ? "provider" : "providers"}{" "}
-                  found
+                  <strong>{providers.length}</strong>{" "}
+                  {providers.length === 1 ? "provider" : "providers"} found
                   {hasActiveFilters && " (filtered)"}
                 </>
               )}
@@ -297,7 +364,21 @@ export function SearchPage() {
                 <span className={styles.filterTag}>
                   <MapPin size={14} />
                   {filters.city}
-                  <button onClick={() => handleFilterChange({ city: "" })}>
+                  {filters.radius && ` (${filters.radius} km)`}
+                  <button
+                    onClick={() =>
+                      handleFilterChange({ city: "", radius: null })
+                    }
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.radius && !filters.city && (
+                <span className={styles.filterTag}>
+                  <Navigation size={14} />
+                  {filters.radius} km radius
+                  <button onClick={() => handleFilterChange({ radius: null })}>
                     <X size={14} />
                   </button>
                 </span>
@@ -321,9 +402,9 @@ export function SearchPage() {
               <Loader2 className={styles.spinner} size={40} />
               <p>Loading providers...</p>
             </div>
-          ) : filteredProviders.length > 0 ? (
-            <div className={styles.providersGrid}>
-              {filteredProviders.map((provider) => (
+          ) : providers.length > 0 ? (
+            <div className={styles.grid}>
+              {providers.map((provider) => (
                 <ProviderCard
                   key={provider.id}
                   provider={provider}
@@ -333,11 +414,14 @@ export function SearchPage() {
             </div>
           ) : (
             <div className={styles.emptyState}>
-              <Search size={48} className={styles.emptyIcon} />
+              <div className={styles.emptyIcon}>
+                <Search size={48} />
+              </div>
               <h3 className={styles.emptyTitle}>No providers found</h3>
               <p className={styles.emptyText}>
-                Try adjusting your search or filters to find what you're looking
-                for.
+                {hasActiveFilters
+                  ? "Try adjusting your filters or search terms"
+                  : "There are no service providers available at the moment"}
               </p>
               {hasActiveFilters && (
                 <Button variant="outline" onClick={handleClearFilters}>

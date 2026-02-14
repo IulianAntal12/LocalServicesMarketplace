@@ -284,6 +284,30 @@
   padding-top: 0.5rem;
 }
 
+/* Section description */
+.sectionDescription {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+
+/* Radius input wrapper */
+.radiusInputWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.radiusInputWrapper input {
+  max-width: 200px;
+}
+
+.radiusHint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .container {

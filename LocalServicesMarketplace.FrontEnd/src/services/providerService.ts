@@ -51,14 +51,17 @@ export interface ProviderProfile {
 
 export interface ProviderListItem {
   id: string;
+  fullName?: string;
   businessName: string;
-  businessDescription?: string;
-  rating?: number;
+  businessDescription?: string | null;
+  rating?: number | null;
   totalReviews: number;
-  city?: string;
-  serviceAreas: string[];
-  serviceCount: number;
-  portfolioImageCount: number;
+  city?: string | null;
+  serviceAreas?: string[];
+  serviceCount?: number;
+  portfolioImageCount?: number;
+  profilePictureUrl?: string | null;
+  distanceKm?: number | null;
 }
 
 export interface UpdateProfileRequest {

@@ -1,4 +1,4 @@
-import { Star, MapPin, Briefcase, Image } from "lucide-react";
+import { Star, MapPin, Briefcase, Image, Navigation } from "lucide-react";
 import type { ProviderListItem } from "../../../services/providerService";
 import styles from "./ProviderCard.module.css";
 
@@ -18,12 +18,21 @@ export function ProviderCard({ provider, onClick }: ProviderCardProps) {
         </div>
         <div className={styles.headerInfo}>
           <h3 className={styles.businessName}>{provider.businessName}</h3>
-          {provider.city && (
-            <p className={styles.location}>
-              <MapPin size={14} />
-              {provider.city}
-            </p>
-          )}
+          <div className={styles.locationInfo}>
+            {provider.city && (
+              <p className={styles.location}>
+                <MapPin size={14} />
+                {provider.city}
+              </p>
+            )}
+            {provider.distanceKm !== null &&
+              provider.distanceKm !== undefined && (
+                <span className={styles.distance}>
+                  <Navigation size={12} />
+                  {provider.distanceKm} km
+                </span>
+              )}
+          </div>
         </div>
       </div>
 
@@ -32,20 +41,24 @@ export function ProviderCard({ provider, onClick }: ProviderCardProps) {
       )}
 
       <div className={styles.stats}>
-        <div className={styles.stat}>
-          <Briefcase size={14} />
-          <span>
-            {provider.serviceCount}{" "}
-            {provider.serviceCount === 1 ? "service" : "services"}
-          </span>
-        </div>
-        <div className={styles.stat}>
-          <Image size={14} />
-          <span>
-            {provider.portfolioImageCount}{" "}
-            {provider.portfolioImageCount === 1 ? "photo" : "photos"}
-          </span>
-        </div>
+        {provider.serviceCount !== undefined && (
+          <div className={styles.stat}>
+            <Briefcase size={14} />
+            <span>
+              {provider.serviceCount}{" "}
+              {provider.serviceCount === 1 ? "service" : "services"}
+            </span>
+          </div>
+        )}
+        {provider.portfolioImageCount !== undefined && (
+          <div className={styles.stat}>
+            <Image size={14} />
+            <span>
+              {provider.portfolioImageCount}{" "}
+              {provider.portfolioImageCount === 1 ? "photo" : "photos"}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className={styles.cardFooter}>

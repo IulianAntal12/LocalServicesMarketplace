@@ -16,6 +16,23 @@
   color: var(--color-text);
 }
 
+/* Radius Input */
+.radiusInput {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.radiusInput input {
+  width: 100%;
+}
+
+.radiusHint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
 /* Rating Options */
 .ratingOptions {
   display: flex;

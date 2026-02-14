@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Save, Loader2, Plus, X } from "lucide-react";
+import { Save, Loader2, Plus, X, MapPin } from "lucide-react";
 import { Button } from "../../../../components/common/Button";
 import { Input } from "../../../../components/common/Input";
 import { SearchableSelect } from "../../../../components/common/SearchableSelect";
@@ -8,7 +8,7 @@ import {
   type ProviderProfile,
   type UpdateProfileRequest,
 } from "../../../../services/providerService";
-import { countries } from "../../../../data/romania-locations";
+import { countries, findCity } from "../../../../data/romania-locations";
 import toast from "react-hot-toast";
 import styles from "./ProfileTab.module.css";
 
@@ -30,6 +30,7 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
     address: profile.address || "",
     city: profile.city || "",
     postalCode: profile.postalCode || "",
+    serviceRadiusKm: profile.serviceRadiusKm || 25,
   });
 
   // Build city options from counties
@@ -38,17 +39,21 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
       value: city.name,
       label: city.name,
       group: county.name,
-    })),
+    }))
   );
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]:
-        name === "hourlyRate" ? (value ? parseFloat(value) : undefined) : value,
+        name === "hourlyRate" || name === "serviceRadiusKm"
+          ? value
+            ? parseFloat(value)
+            : undefined
+          : value,
     }));
   };
 
@@ -85,6 +90,18 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
     try {
       setLoading(true);
 
+      // Get coordinates from selected city
+      let latitude: number | undefined;
+      let longitude: number | undefined;
+
+      if (formData.city) {
+        const cityData = findCity(formData.city);
+        if (cityData) {
+          latitude = cityData.city.lat;
+          longitude = cityData.city.lng;
+        }
+      }
+
       const updateData: UpdateProfileRequest = {
         businessName: formData.businessName || undefined,
         businessDescription: formData.businessDescription || undefined,
@@ -94,6 +111,9 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
         address: formData.address || undefined,
         city: formData.city || undefined,
         postalCode: formData.postalCode || undefined,
+        latitude,
+        longitude,
+        serviceRadiusKm: formData.serviceRadiusKm,
       };
 
       await providerService.updateProfile(updateData);
@@ -177,7 +197,7 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
 
         {/* Location */}
         <div className={styles.formSection}>
-          <h3 className={styles.sectionTitle}>Location</h3>
+          <h3 className={styles.sectionTitle}>Location & Service Area</h3>
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
@@ -215,23 +235,48 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
               name="address"
               value={formData.address}
               onChange={handleChange}
-              placeholder="Your business address"
+              placeholder="e.g., Str. Principală nr. 123"
             />
+          </div>
+
+          {/* Service Radius - NEW! */}
+          <div className={styles.formGroup}>
+            <label htmlFor="serviceRadiusKm" className={styles.label}>
+              <MapPin size={16} style={{ marginRight: "0.5rem", verticalAlign: "middle" }} />
+              Service Radius (km)
+            </label>
+            <div className={styles.radiusInputWrapper}>
+              <Input
+                id="serviceRadiusKm"
+                name="serviceRadiusKm"
+                type="number"
+                min="1"
+                max="100"
+                value={formData.serviceRadiusKm || ""}
+                onChange={handleChange}
+                placeholder="e.g., 25"
+              />
+              <span className={styles.radiusHint}>
+                {formData.serviceRadiusKm && formData.city
+                  ? `You'll appear in searches within ${formData.serviceRadiusKm} km of ${formData.city}`
+                  : "Set how far you're willing to travel for jobs"}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Service Areas */}
+        {/* Service Areas (Additional) */}
         <div className={styles.formSection}>
-          <h3 className={styles.sectionTitle}>Service Areas</h3>
+          <h3 className={styles.sectionTitle}>Additional Service Areas</h3>
           <p className={styles.sectionDescription}>
-            Add the areas where you provide services
+            Add specific neighborhoods, districts, or nearby towns you serve
           </p>
 
           <div className={styles.serviceAreasInput}>
             <Input
               value={newServiceArea}
               onChange={(e) => setNewServiceArea(e.target.value)}
-              placeholder="Add a service area (e.g., Downtown, Northside)"
+              placeholder="Add a service area..."
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -250,7 +295,7 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
           </div>
 
           {formData.serviceAreas.length > 0 && (
-            <div className={styles.serviceAreasTags}>
+            <div className={styles.serviceAreaTags}>
               {formData.serviceAreas.map((area) => (
                 <span key={area} className={styles.serviceAreaTag}>
                   {area}
@@ -292,6 +337,7 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
           <ul className={styles.infoList}>
             <li>Add a detailed business description</li>
             <li>Set competitive hourly rates</li>
+            <li>Set your service radius to appear in nearby searches</li>
             <li>List all areas you serve</li>
             <li>Keep your contact info up to date</li>
           </ul>
@@ -305,7 +351,9 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
           </div>
           <div className={styles.infoRow}>
             <span className={styles.infoLabel}>Business Name</span>
-            <span className={styles.infoValue}>{profile.businessName}</span>
+            <span className={styles.infoValue}>
+              {profile.businessName || "Not set"}
+            </span>
           </div>
           {profile.phoneNumber && (
             <div className={styles.infoRow}>
@@ -313,6 +361,14 @@ export function ProfileTab({ profile, onUpdate }: ProfileTabProps) {
               <span className={styles.infoValue}>{profile.phoneNumber}</span>
             </div>
           )}
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Service Radius</span>
+            <span className={styles.infoValue}>
+              {profile.serviceRadiusKm
+                ? `${profile.serviceRadiusKm} km`
+                : "Not set"}
+            </span>
+          </div>
         </div>
       </div>
     </div>
