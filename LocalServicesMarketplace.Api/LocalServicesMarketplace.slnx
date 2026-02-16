@@ -4,4 +4,7 @@
     <Project Path="../LocalServicesMarketplace.Infrastructure/LocalServicesMarketplace.Infrastructure.csproj" />
     <Project Path="LocalServicesMarketplace.Api.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="../LocalServicesMarketplace.Tests/LocalServicesMarketplace.Tests.csproj" Id="8440dda2-4de4-4c41-8cf4-f177b8862b78" />
+  </Folder>
 </Solution>
