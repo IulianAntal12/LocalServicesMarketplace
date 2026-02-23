@@ -46,6 +46,6 @@ app.MapEndpoints();
 app.MapControllers();
 
 // Seed database
-await app.SeedDataAsync();
+//await app.SeedDataAsync();
 
 app.Run();

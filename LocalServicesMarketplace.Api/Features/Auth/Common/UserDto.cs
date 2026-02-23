@@ -7,4 +7,5 @@ public class UserDto
     public required string FullName { get; set; }
     public required List<string> Roles { get; set; }
     public string? BusinessName { get; set; }
+    public string? City { get; set; }
 }

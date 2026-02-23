@@ -56,7 +56,6 @@ export function SearchFilters({
   // Handle radius change - only allow positive integers
   const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
     // Allow empty string (to clear) or positive integers
     if (value === "") {
       onFilterChange({ radius: null });
@@ -108,9 +107,7 @@ export function SearchFilters({
       {/* Radius Filter - only show when city is selected */}
       {filters.city && (
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>
-            Search Radius (km)
-          </label>
+          <label className={styles.filterLabel}>Search Radius (km)</label>
           <div className={styles.radiusInput}>
             <Input
               type="number"
@@ -121,9 +118,9 @@ export function SearchFilters({
               onChange={handleRadiusChange}
             />
             <span className={styles.radiusHint}>
-              {filters.radius 
+              {filters.radius
                 ? `Searching within ${filters.radius} km of ${filters.city}`
-                : "Leave empty for exact city match"}
+                : `Default: 10 km radius around ${filters.city}`}
             </span>
           </div>
         </div>

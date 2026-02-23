@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import {
-  Search,
-  MapPin,
-  SlidersHorizontal,
-  X,
-  Loader2,
-  Navigation,
-} from "lucide-react";
+import { Search, MapPin, SlidersHorizontal, X, Loader2 } from "lucide-react";
 import {
   providerService,
   type ProviderListItem,
@@ -18,6 +11,7 @@ import { SearchFilters } from "./components/SearchFilters";
 import { ProviderCard } from "./components/ProviderCard";
 import { Button } from "../../components/common";
 import { countries, findCity } from "../../data/romania-locations";
+import { useAuth } from "../../context";
 import styles from "./SearchPage.module.css";
 
 export interface FilterState {
@@ -31,6 +25,7 @@ export interface FilterState {
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Search states
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
@@ -39,16 +34,16 @@ export function SearchPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // Filter state
-  const [filters, setFilters] = useState<FilterState>({
+  // Filter state - use URL params first, then user's city as default
+  const [filters, setFilters] = useState<FilterState>(() => ({
     category: searchParams.get("category") || "",
-    city: searchParams.get("city") || "",
+    city: searchParams.get("city") || user?.city || "",
     radius: searchParams.get("radius")
       ? parseInt(searchParams.get("radius")!, 10)
       : null,
     minRating: null,
     sortBy: "rating",
-  });
+  }));
 
   // Get all unique cities for the filter dropdown
   const allCities = countries.flatMap((county) =>
@@ -86,15 +81,17 @@ export function SearchPage() {
         }
       }
 
-      // Use search service if we have location-based search, otherwise get all
-      if (lat && lng && filters.radius) {
+      // Use search service if we have location (use default radius of 10km if not specified)
+      if (lat && lng) {
+        const searchRadius = filters.radius ?? 10; // Default 10km radius
+
         // Use backend search with Haversine distance calculation
         const response = await searchService.searchProviders({
           q: searchQuery || undefined,
           category: filters.category || undefined,
           lat,
           lng,
-          radius: filters.radius,
+          radius: searchRadius,
           minRating: filters.minRating ?? undefined,
           sortBy: filters.sortBy === "name" ? "rating" : filters.sortBy,
           page: 1,
@@ -118,7 +115,7 @@ export function SearchPage() {
 
         setProviders(mappedProviders);
       } else {
-        // Get all providers and filter locally
+        // No city selected - get all providers and filter locally
         const data = await providerService.getAll();
         let result = [...data];
 
@@ -142,18 +139,12 @@ export function SearchPage() {
           );
         }
 
-        // Filter by exact city (when no radius)
-        if (filters.city && !filters.radius) {
-          result = result.filter(
-            (p) => p.city?.toLowerCase() === filters.city.toLowerCase(),
-          );
-        }
-
         // Filter by minimum rating
         if (filters.minRating !== null) {
-          result = result.filter(
-            (p) => p.rating != null && p.rating >= filters.minRating!,
-          );
+          result = result.filter((p) => {
+            const rating = p.rating ?? null;
+            return rating !== null && rating >= filters.minRating!;
+          });
         }
 
         // Sort locally
@@ -326,7 +317,7 @@ export function SearchPage() {
                 <>
                   <strong>{providers.length}</strong>{" "}
                   {providers.length === 1 ? "provider" : "providers"} found
-                  {hasActiveFilters && " (filtered)"}
+                  {filters.city && ` near ${filters.city}`}
                 </>
               )}
             </p>
@@ -364,21 +355,12 @@ export function SearchPage() {
                 <span className={styles.filterTag}>
                   <MapPin size={14} />
                   {filters.city}
-                  {filters.radius && ` (${filters.radius} km)`}
+                  {filters.radius ? ` (${filters.radius} km)` : " (10 km)"}
                   <button
                     onClick={() =>
                       handleFilterChange({ city: "", radius: null })
                     }
                   >
-                    <X size={14} />
-                  </button>
-                </span>
-              )}
-              {filters.radius && !filters.city && (
-                <span className={styles.filterTag}>
-                  <Navigation size={14} />
-                  {filters.radius} km radius
-                  <button onClick={() => handleFilterChange({ radius: null })}>
                     <X size={14} />
                   </button>
                 </span>
@@ -420,7 +402,7 @@ export function SearchPage() {
               <h3 className={styles.emptyTitle}>No providers found</h3>
               <p className={styles.emptyText}>
                 {hasActiveFilters
-                  ? "Try adjusting your filters or search terms"
+                  ? "Try adjusting your filters, increasing the radius, or search in a different city"
                   : "There are no service providers available at the moment"}
               </p>
               {hasActiveFilters && (

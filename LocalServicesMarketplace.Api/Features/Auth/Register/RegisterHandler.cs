@@ -136,6 +136,7 @@ public class RegisterHandler(
         Email = user.Email!,
         FullName = user.FullName,
         Roles = [.. roles],
-        BusinessName = user.BusinessName
+        BusinessName = user.BusinessName,
+        City = user.City
     };
 }

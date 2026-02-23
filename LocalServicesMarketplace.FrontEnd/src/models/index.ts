@@ -6,6 +6,7 @@ export interface User {
   fullName: string;
   roles: string[];
   businessName?: string;
+  city?: string;
 }
 
 export interface LoginRequest {
